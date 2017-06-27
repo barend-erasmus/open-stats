@@ -1,0 +1,27 @@
+{
+  "name": "open-stats",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/barend-erasmus/open-stats.git"
+  },
+  "author": "Barend Erasmus",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/barend-erasmus/open-stats/issues"
+  },
+  "homepage": "https://github.com/barend-erasmus/open-stats#readme",
+  "dependencies": {
+    "co": "^4.6.0",
+    "socket.io": "^2.0.3",
+    "ws": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^3.0.0"
+  }
+}
