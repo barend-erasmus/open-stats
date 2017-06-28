@@ -4,7 +4,7 @@
 
 // Imports
 import * as co from 'co';
-import * as WebSocket from 'ws'; 
+import * as WebSocket from 'ws';
 
 // Imports services
 import { MetricService } from './services/metric';
@@ -12,31 +12,21 @@ import { MetricService } from './services/metric';
 // Imports repositories
 import { MetricRepository } from './repositories/metric';
 
-const metricService = new MetricService(new MetricRepository('mongodb://localhost:27017/open-stats'));
+const metricService = new MetricService(new MetricRepository('mongodb://mongo:27017/open-stats'));
+
+const wss = new WebSocket.Server({ port: 3000, path: '/open-stats' });
+
+wss.on('connection', (ws: any) => {
+  ws.on('message', (message: string) => {
 
 
-co(function* () {
-  yield metricService.log({
-    type: 'counter',
-    name: 'requests',
-    value: 1,
-    unit: null,
-    timestamp: new Date().getTime()
+    const data = JSON.parse(message);
+
+    if (data.type === 'test') {
+      console.log(message);
+    } else {
+      metricService.log(data);
+    }
   });
-
-  console.log('DONE');
-
-  const a = yield metricService.getCounter('requests');
-
-  console.log(a);
-
 });
-
-// const wss = new WebSocket.Server({ port: 3000 });
-
-// wss.on('connection', (ws: any) => {
-//   ws.on('message', (message: string) => {
-//         metricService.log(JSON.parse(message));
-//   });
-// });
 

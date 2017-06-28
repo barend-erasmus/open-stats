@@ -10,12 +10,14 @@
                alert("WebSocket is supported by your Browser!");
                
                // Let us open a web socket
-               var ws = new WebSocket("ws://localhost:3000");
+               var ws = new WebSocket("ws://localhost:3000/open-stats");
 				
                ws.onopen = function()
                {
                   // Web Socket is connected, send data using send()
-                  ws.send("Message to send");
+                  ws.send(JSON.stringify({
+                      type: 'test'
+                  }));
                   alert("Message is sent...");
                };
 				
