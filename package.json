@@ -18,10 +18,12 @@
   "homepage": "https://github.com/barend-erasmus/open-stats#readme",
   "dependencies": {
     "co": "^4.6.0",
+    "mongodb": "^2.2.29",
     "socket.io": "^2.0.3",
     "ws": "^3.0.0"
   },
   "devDependencies": {
+    "@types/mongodb": "^2.2.6",
     "@types/ws": "^3.0.0"
   }
 }
