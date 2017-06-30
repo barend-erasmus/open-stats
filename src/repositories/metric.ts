@@ -1,6 +1,7 @@
 // Imports
 import * as co from 'co';
 import * as mongo from 'mongodb';
+import * as moment from 'moment';
 
 // Imports metric types
 import { Counter } from './../metric-types/counter';
@@ -23,7 +24,22 @@ export class MetricRepository {
 
             const collection: mongo.Collection = db.collection('counters');
 
-            const result: any = yield collection.insertOne(counter);
+            const date: moment.Moment = moment(counter.timestamp);
+
+            const result: any = yield collection.insertOne({
+                name: counter.name,
+                timestamp: counter.timestamp,
+                unit: counter.unit,
+                value: counter.value,
+                date: {
+                    day: date.date(),
+                    month: date.month() + 1,
+                    year: date.year(),
+                    hour: date.hour(),
+                    minute: date.minute(),
+                    second: date.second()
+                }
+            });
 
             db.close();
 
@@ -47,7 +63,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        sum: { $sum: "$value" },
+                        sum: { $sum: '$value' },
                         count: { $sum: 1 }
                     }
                 }
@@ -56,6 +72,45 @@ export class MetricRepository {
             db.close();
 
             return result.length === 0 ? 0 : result[0].sum;
+        });
+    }
+
+    public listCountersPerSecond(name: string): Promise<Counter[]> {
+        const self = this;
+
+        return co(function* () {
+
+            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
+
+            const collection: mongo.Collection = db.collection('counters');
+
+            const result: any[] = yield collection.aggregate([
+                {
+                    $match: { name: name }
+                },
+                {
+                    $group: {
+                        _id: {
+                            day: '$date.day',
+                            month: '$date.month',
+                            year: '$date.year',
+                            hour: '$date.hour',
+                            minute: '$date.minute',
+                            second: '$date.second'
+                        },
+                        sum: { $sum: '$value' },
+                        count: { $sum: 1 }
+                    }
+                }
+            ])
+            .sort({ _id: {
+                day: -1
+            } })
+            .toArray();
+
+            db.close();
+
+            return result;
         });
     }
 
@@ -68,7 +123,22 @@ export class MetricRepository {
 
             const collection: mongo.Collection = db.collection('gauges');
 
-            const result: any = yield collection.insertOne(gauge);
+            const date: moment.Moment = moment(gauge.timestamp);
+
+            const result: any = yield collection.insertOne({
+                name: gauge.name,
+                timestamp: gauge.timestamp,
+                unit: gauge.unit,
+                offset: gauge.offset,
+                date: {
+                    day: date.date(),
+                    month: date.month() + 1,
+                    year: date.year(),
+                    hour: date.hour(),
+                    minute: date.minute(),
+                    second: date.second()
+                }
+            });
 
             db.close();
 
@@ -92,7 +162,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        value: { $sum: "$offset" },
+                        value: { $sum: '$offset' },
                         count: { $sum: 1 }
                     }
                 }
@@ -113,7 +183,22 @@ export class MetricRepository {
 
             const collection: mongo.Collection = db.collection('samplings');
 
-            const result: any = yield collection.insertOne(sampling);
+            const date: moment.Moment = moment(sampling.timestamp);
+
+            const result: any = yield collection.insertOne({
+                name: sampling.name,
+                timestamp: sampling.timestamp,
+                unit: sampling.unit,
+                value: sampling.value,
+                date: {
+                    day: date.date(),
+                    month: date.month() + 1,
+                    year: date.year(),
+                    hour: date.hour(),
+                    minute: date.minute(),
+                    second: date.second()
+                }
+            });
 
             db.close();
 
@@ -137,7 +222,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        mean: { $avg: "$value" },
+                        mean: { $avg: '$value' },
                         count: { $sum: 1 }
                     }
                 }
@@ -165,7 +250,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        minimum: { $min: "$value" },
+                        minimum: { $min: '$value' },
                         count: { $sum: 1 }
                     }
                 }
@@ -194,7 +279,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        maximum: { $max: "$value" },
+                        maximum: { $max: '$value' },
                         count: { $sum: 1 }
                     }
                 }
@@ -222,7 +307,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        standardDeviation: { $stdDevPop: "$value" },
+                        standardDeviation: { $stdDevPop: '$value' },
                         count: { $sum: 1 }
                     }
                 }
@@ -243,7 +328,22 @@ export class MetricRepository {
 
             const collection: mongo.Collection = db.collection('timings');
 
-            const result: any = yield collection.insertOne(timing);
+            const date: moment.Moment = moment(timing.timestamp);
+
+            const result: any = yield collection.insertOne({
+                name: timing.name,
+                timestamp: timing.timestamp,
+                unit: timing.unit,
+                value: timing.value,
+                date: {
+                    day: date.date(),
+                    month: date.month() + 1,
+                    year: date.year(),
+                    hour: date.hour(),
+                    minute: date.minute(),
+                    second: date.second()
+                }
+            });
 
             db.close();
 
@@ -267,7 +367,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        mean: { $avg: "$value" },
+                        mean: { $avg: '$value' },
                         count: { $sum: 1 }
                     }
                 }
@@ -295,7 +395,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        minimum: { $min: "$value" },
+                        minimum: { $min: '$value' },
                         count: { $sum: 1 }
                     }
                 }
@@ -324,7 +424,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        maximum: { $max: "$value" },
+                        maximum: { $max: '$value' },
                         count: { $sum: 1 }
                     }
                 }
@@ -352,7 +452,7 @@ export class MetricRepository {
                 {
                     $group: {
                         _id: null,
-                        standardDeviation: { $stdDevPop: "$value" },
+                        standardDeviation: { $stdDevPop: '$value' },
                         count: { $sum: 1 }
                     }
                 }

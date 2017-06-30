@@ -44,6 +44,12 @@ wss.on('connection', (ws: any) => {
   });
 });
 
+app.get('/write', (req, res) => {
+  co(function* () {
+    const data = req.body;
+    metricService.log(data);
+  });
+});
 
 app.get('/counter', (req, res) => {
   co(function* () {
@@ -69,6 +75,14 @@ app.get('/sampling', (req, res) => {
 app.get('/timing', (req, res) => {
   co(function* () {
     const result = yield metricService.getTiming(req.query.name);
+    res.json(result);
+  });
+});
+
+
+app.get('/list/counters/minute', (req, res) => {
+  co(function* () {
+    const result = yield metricService.listCountersPerMinute(req.query.name);
     res.json(result);
   });
 });

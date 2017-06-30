@@ -121,4 +121,8 @@ export class MetricService {
             return model;
         });
     }
+
+    public listCountersPerMinute(name: string): Promise<CounterModel[]> {
+        return this.metricRepository.listCountersPerSecond(name);
+    }
 }
