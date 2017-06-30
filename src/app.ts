@@ -44,7 +44,7 @@ wss.on('connection', (ws: any) => {
   });
 });
 
-app.get('/write', (req, res) => {
+app.get('/log', (req, res) => {
   co(function* () {
     const data = req.body;
     metricService.log(data);
@@ -80,9 +80,30 @@ app.get('/timing', (req, res) => {
 });
 
 
+app.get('/list/counters/second', (req, res) => {
+  co(function* () {
+    const result = yield metricService.listCountersPerSecond(req.query.name);
+    res.json(result);
+  });
+});
+
 app.get('/list/counters/minute', (req, res) => {
   co(function* () {
     const result = yield metricService.listCountersPerMinute(req.query.name);
+    res.json(result);
+  });
+});
+
+app.get('/list/counters/hour', (req, res) => {
+  co(function* () {
+    const result = yield metricService.listCountersPerHour(req.query.name);
+    res.json(result);
+  });
+});
+
+app.get('/list/counters/day', (req, res) => {
+  co(function* () {
+    const result = yield metricService.listCountersPerDay(req.query.name);
     res.json(result);
   });
 });

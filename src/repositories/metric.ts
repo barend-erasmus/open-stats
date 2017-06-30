@@ -76,6 +76,50 @@ export class MetricRepository {
     }
 
     public listCountersPerSecond(name: string): Promise<Counter[]> {
+        return this.listCounters(name, {
+            day: '$date.day',
+            month: '$date.month',
+            year: '$date.year',
+            hour: '$date.hour',
+            minute: '$date.minute',
+            second: '$date.second'
+        });
+    }
+
+    public listCountersPerMinute(name: string): Promise<Counter[]> {
+        return this.listCounters(name, {
+            day: '$date.day',
+            month: '$date.month',
+            year: '$date.year',
+            hour: '$date.hour',
+            minute: '$date.minute',
+            second: 0
+        });
+    }
+
+    public listCountersPerHour(name: string): Promise<Counter[]> {
+        return this.listCounters(name, {
+            day: '$date.day',
+            month: '$date.month',
+            year: '$date.year',
+            hour: '$date.hour',
+            minute: 0,
+            second: 0
+        });
+    }
+
+    public listCountersPerDay(name: string): Promise<Counter[]> {
+        return this.listCounters(name, {
+            day: '$date.day',
+            month: '$date.month',
+            year: '$date.year',
+            hour: 0,
+            minute: 0,
+            second: 0
+        });
+    }
+
+    public listCounters(name: string, group: { day: string | number, month: string | number, year: string | number, hour: string | number, minute: string | number, second: string | number }): Promise<Counter[]> {
         const self = this;
 
         return co(function* () {
@@ -90,27 +134,17 @@ export class MetricRepository {
                 },
                 {
                     $group: {
-                        _id: {
-                            day: '$date.day',
-                            month: '$date.month',
-                            year: '$date.year',
-                            hour: '$date.hour',
-                            minute: '$date.minute',
-                            second: '$date.second'
-                        },
+                        _id: group,
                         sum: { $sum: '$value' },
                         count: { $sum: 1 }
                     }
                 }
             ])
-            .sort({ _id: {
-                day: -1
-            } })
-            .toArray();
+                .toArray();
 
             db.close();
 
-            return result;
+            return result.map((x) => new Counter(name, x.sum, null, new Date(x._id.year, x._id.month - 1, x._id.day, x._id.hour, x._id.minute, x._id.second).getTime()));
         });
     }
 
