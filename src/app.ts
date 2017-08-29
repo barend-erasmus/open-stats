@@ -43,7 +43,7 @@ wss.on('connection', (ws: any) => {
   });
 });
 
-app.get('/write', async (req, res) => {
+app.get('/log', async (req, res) => {
   const data = req.body;
   await metricService.log(data);
   res.send('OK');
@@ -69,9 +69,23 @@ app.get('/timing', async (req, res) => {
   res.json(result);
 });
 
+app.get('/list/counters/second', async (req, res) => {
+  const result = await metricService.listCountersPerSecond(req.query.name);
+  res.json(result);
+});
 
 app.get('/list/counters/minute', async (req, res) => {
   const result = await metricService.listCountersPerMinute(req.query.name);
+  res.json(result);
+});
+
+app.get('/list/counters/hour', async (req, res) => {
+  const result = await metricService.listCountersPerHour(req.query.name);
+  res.json(result);
+});
+
+app.get('/list/counters/day', async (req, res) => {
+  const result = await metricService.listCountersPerDay(req.query.name);
   res.json(result);
 });
 

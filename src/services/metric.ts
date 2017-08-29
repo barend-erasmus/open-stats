@@ -107,7 +107,19 @@ export class MetricService {
         return model;
     }
 
-    public listCountersPerMinute(name: string): Promise<CounterModel[]> {
+    public listCountersPerSecond(name: string): Promise<CounterModel[]> {
         return this.metricRepository.listCountersPerSecond(name);
+    }
+
+    public listCountersPerMinute(name: string): Promise<CounterModel[]> {
+        return this.metricRepository.listCountersPerMinute(name);
+    }
+
+    public listCountersPerHour(name: string): Promise<CounterModel[]> {
+        return this.metricRepository.listCountersPerHour(name);
+    }
+
+    public listCountersPerDay(name: string): Promise<CounterModel[]> {
+        return this.metricRepository.listCountersPerDay(name);
     }
 }
