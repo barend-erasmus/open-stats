@@ -1,6 +1,3 @@
-// Imports
-import * as co from 'co';
-
 // Imports repositories
 import { MetricRepository } from './../repositories/metric';
 
@@ -48,78 +45,66 @@ export class MetricService {
         return Promise.resolve(true);
     }
 
-    public getCounter(name: string): Promise<CounterModel> {
-        const self = this;
-        return co(function* () {
-            const sum: number = yield self.metricRepository.calculateCounterSum(name);
-            const model: CounterModel = new CounterModel(
-                name,
-                sum,
-                null
-            );
+    public async getCounter(name: string): Promise<CounterModel> {
+        const sum: number = await this.metricRepository.calculateCounterSum(name);
+        const model: CounterModel = new CounterModel(
+            name,
+            sum,
+            null
+        );
 
-            return model;
-        });
+        return model;
     }
 
-    public getGauge(name: string): Promise<GaugeModel> {
-        const self = this;
-        return co(function* () {
-            const value: number = yield self.metricRepository.calculateGaugeValue(name);
-            const model: GaugeModel = new GaugeModel(
-                name,
-                value,
-                null
-            );
+    public async getGauge(name: string): Promise<GaugeModel> {
+        const value: number = await this.metricRepository.calculateGaugeValue(name);
+        const model: GaugeModel = new GaugeModel(
+            name,
+            value,
+            null
+        );
 
-            return model;
-        });
+        return model;
     }
 
-    public getSampling(name: string): Promise<SamplingModel> {
-        const self = this;
-        return co(function* () {
-            const mean: number = yield self.metricRepository.calculateSamplingMean(name);
-            const median: number = null;
-            const minimum: number = yield self.metricRepository.calculateSamplingMinimum(name);
-            const maximum: number = yield self.metricRepository.calculateSamplingMaximum(name);
-            const standardDeviation: number = yield self.metricRepository.calculateSamplingStandardDeviation(name);
+    public async getSampling(name: string): Promise<SamplingModel> {
+        const mean: number = await this.metricRepository.calculateSamplingMean(name);
+        const median: number = null;
+        const minimum: number = await this.metricRepository.calculateSamplingMinimum(name);
+        const maximum: number = await this.metricRepository.calculateSamplingMaximum(name);
+        const standardDeviation: number = await this.metricRepository.calculateSamplingStandardDeviation(name);
 
-            const model: SamplingModel = new SamplingModel(
-                name,
-                mean,
-                median,
-                minimum,
-                maximum,
-                standardDeviation,
-                null
-            );
+        const model: SamplingModel = new SamplingModel(
+            name,
+            mean,
+            median,
+            minimum,
+            maximum,
+            standardDeviation,
+            null
+        );
 
-            return model;
-        });
+        return model;
     }
 
-    public getTiming(name: string): Promise<TimingModel> {
-        const self = this;
-        return co(function* () {
-            const mean: number = yield self.metricRepository.calculateTimingMean(name);
-            const median: number = null;
-            const minimum: number = yield self.metricRepository.calculateTimingMinimum(name);
-            const maximum: number = yield self.metricRepository.calculateTimingMaximum(name);
-            const standardDeviation: number = yield self.metricRepository.calculateTimingStandardDeviation(name);
+    public async getTiming(name: string): Promise<TimingModel> {
+        const mean: number = await this.metricRepository.calculateTimingMean(name);
+        const median: number = null;
+        const minimum: number = await this.metricRepository.calculateTimingMinimum(name);
+        const maximum: number = await this.metricRepository.calculateTimingMaximum(name);
+        const standardDeviation: number = await this.metricRepository.calculateTimingStandardDeviation(name);
 
-            const model: TimingModel = new TimingModel(
-                name,
-                mean,
-                median,
-                minimum,
-                maximum,
-                standardDeviation,
-                null
-            );
+        const model: TimingModel = new TimingModel(
+            name,
+            mean,
+            median,
+            minimum,
+            maximum,
+            standardDeviation,
+            null
+        );
 
-            return model;
-        });
+        return model;
     }
 
     public listCountersPerMinute(name: string): Promise<CounterModel[]> {

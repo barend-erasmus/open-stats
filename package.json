@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/barend-erasmus/open-stats#readme",
   "dependencies": {
-    "co": "^4.6.0",
     "cors": "^2.8.3",
     "express": "^4.15.3",
     "moment": "^2.18.1",

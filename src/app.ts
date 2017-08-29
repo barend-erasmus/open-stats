@@ -5,7 +5,6 @@
 // Imports
 import * as express from 'express';
 import * as http from 'http';
-import * as co from 'co';
 import * as WebSocket from 'ws';
 
 // Imports middleware
@@ -17,7 +16,7 @@ import { MetricService } from './services/metric';
 // Imports repositories
 import { MetricRepository } from './repositories/metric';
 
-const metricService = new MetricService(new MetricRepository('mongodb://mongo:27017/open-stats'));
+const metricService = new MetricService(new MetricRepository('mongodb://localhost:27017/open-stats'));
 
 const app = express();
 
@@ -44,47 +43,36 @@ wss.on('connection', (ws: any) => {
   });
 });
 
-app.get('/write', (req, res) => {
-  co(function* () {
-    const data = req.body;
-    metricService.log(data);
-  });
+app.get('/write', async (req, res) => {
+  const data = req.body;
+  await metricService.log(data);
+  res.send('OK');
 });
 
-app.get('/counter', (req, res) => {
-  co(function* () {
-    const result = yield metricService.getCounter(req.query.name);
-    res.json(result);
-  });
+app.get('/counter', async (req, res) => {
+  const result = await metricService.getCounter(req.query.name);
+  res.json(result);
 });
 
-app.get('/gauge', (req, res) => {
-  co(function* () {
-    const result = yield metricService.getGauge(req.query.name);
-    res.json(result);
-  });
+app.get('/gauge', async (req, res) => {
+  const result = await metricService.getGauge(req.query.name);
+  res.json(result);
 });
 
-app.get('/sampling', (req, res) => {
-  co(function* () {
-    const result = yield metricService.getSampling(req.query.name);
-    res.json(result);
-  });
+app.get('/sampling', async (req, res) => {
+  const result = await metricService.getSampling(req.query.name);
+  res.json(result);
 });
 
-app.get('/timing', (req, res) => {
-  co(function* () {
-    const result = yield metricService.getTiming(req.query.name);
-    res.json(result);
-  });
+app.get('/timing', async (req, res) => {
+  const result = await metricService.getTiming(req.query.name);
+  res.json(result);
 });
 
 
-app.get('/list/counters/minute', (req, res) => {
-  co(function* () {
-    const result = yield metricService.listCountersPerMinute(req.query.name);
-    res.json(result);
-  });
+app.get('/list/counters/minute', async (req, res) => {
+  const result = await metricService.listCountersPerMinute(req.query.name);
+  res.json(result);
 });
 
 server.listen(3000);

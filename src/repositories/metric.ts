@@ -1,5 +1,4 @@
 // Imports
-import * as co from 'co';
 import * as mongo from 'mongodb';
 import * as moment from 'moment';
 
@@ -15,453 +14,380 @@ export class MetricRepository {
 
     }
 
-    public saveCounter(counter: Counter): Promise<boolean> {
-        const self = this;
+    public async saveCounter(counter: Counter): Promise<boolean> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('counters');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
+        const date: moment.Moment = moment(counter.timestamp);
 
-            const collection: mongo.Collection = db.collection('counters');
-
-            const date: moment.Moment = moment(counter.timestamp);
-
-            const result: any = yield collection.insertOne({
-                name: counter.name,
-                timestamp: counter.timestamp,
-                unit: counter.unit,
-                value: counter.value,
-                date: {
-                    day: date.date(),
-                    month: date.month() + 1,
-                    year: date.year(),
-                    hour: date.hour(),
-                    minute: date.minute(),
-                    second: date.second()
-                }
-            });
-
-            db.close();
-
-            return true;
+        const result: any = await collection.insertOne({
+            name: counter.name,
+            timestamp: counter.timestamp,
+            unit: counter.unit,
+            value: counter.value,
+            date: {
+                day: date.date(),
+                month: date.month() + 1,
+                year: date.year(),
+                hour: date.hour(),
+                minute: date.minute(),
+                second: date.second()
+            }
         });
+
+        db.close();
+
+        return true;
     }
 
-    public calculateCounterSum(name: string): Promise<number> {
-        const self = this;
+    public async calculateCounterSum(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('counters');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('counters');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        sum: { $sum: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    sum: { $sum: '$value' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].sum;
-        });
+        return result.length === 0 ? 0 : result[0].sum;
     }
 
-    public listCountersPerSecond(name: string): Promise<Counter[]> {
-        const self = this;
+    public async listCountersPerSecond(name: string): Promise<Counter[]> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('counters');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('counters');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: {
-                            day: '$date.day',
-                            month: '$date.month',
-                            year: '$date.year',
-                            hour: '$date.hour',
-                            minute: '$date.minute',
-                            second: '$date.second'
-                        },
-                        sum: { $sum: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: {
+                        day: '$date.day',
+                        month: '$date.month',
+                        year: '$date.year',
+                        hour: '$date.hour',
+                        minute: '$date.minute',
+                        second: '$date.second'
+                    },
+                    sum: { $sum: '$value' },
+                    count: { $sum: 1 }
                 }
-            ])
-            .sort({ _id: {
-                day: -1
-            } })
+            }
+        ])
+            .sort({
+                _id: {
+                    day: -1
+                }
+            })
             .toArray();
 
-            db.close();
+        db.close();
 
-            return result;
-        });
+        return result;
     }
 
-    public saveGauge(gauge: Gauge): Promise<boolean> {
-        const self = this;
+    public async saveGauge(gauge: Gauge): Promise<boolean> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('gauges');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
+        const date: moment.Moment = moment(gauge.timestamp);
 
-            const collection: mongo.Collection = db.collection('gauges');
-
-            const date: moment.Moment = moment(gauge.timestamp);
-
-            const result: any = yield collection.insertOne({
-                name: gauge.name,
-                timestamp: gauge.timestamp,
-                unit: gauge.unit,
-                offset: gauge.offset,
-                date: {
-                    day: date.date(),
-                    month: date.month() + 1,
-                    year: date.year(),
-                    hour: date.hour(),
-                    minute: date.minute(),
-                    second: date.second()
-                }
-            });
-
-            db.close();
-
-            return true;
+        const result: any = await collection.insertOne({
+            name: gauge.name,
+            timestamp: gauge.timestamp,
+            unit: gauge.unit,
+            offset: gauge.offset,
+            date: {
+                day: date.date(),
+                month: date.month() + 1,
+                year: date.year(),
+                hour: date.hour(),
+                minute: date.minute(),
+                second: date.second()
+            }
         });
+
+        db.close();
+
+        return true;
     }
 
-    public calculateGaugeValue(name: string): Promise<number> {
-        const self = this;
+    public async calculateGaugeValue(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('gauges');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('gauges');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        value: { $sum: '$offset' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    value: { $sum: '$offset' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].value;
-        });
+        return result.length === 0 ? 0 : result[0].value;
     }
 
-    public saveSampling(sampling: Sampling): Promise<boolean> {
-        const self = this;
+    public async saveSampling(sampling: Sampling): Promise<boolean> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('samplings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
+        const date: moment.Moment = moment(sampling.timestamp);
 
-            const collection: mongo.Collection = db.collection('samplings');
-
-            const date: moment.Moment = moment(sampling.timestamp);
-
-            const result: any = yield collection.insertOne({
-                name: sampling.name,
-                timestamp: sampling.timestamp,
-                unit: sampling.unit,
-                value: sampling.value,
-                date: {
-                    day: date.date(),
-                    month: date.month() + 1,
-                    year: date.year(),
-                    hour: date.hour(),
-                    minute: date.minute(),
-                    second: date.second()
-                }
-            });
-
-            db.close();
-
-            return true;
+        const result: any = await collection.insertOne({
+            name: sampling.name,
+            timestamp: sampling.timestamp,
+            unit: sampling.unit,
+            value: sampling.value,
+            date: {
+                day: date.date(),
+                month: date.month() + 1,
+                year: date.year(),
+                hour: date.hour(),
+                minute: date.minute(),
+                second: date.second()
+            }
         });
+
+        db.close();
+
+        return true;
     }
 
-    public calculateSamplingMean(name: string): Promise<number> {
-        const self = this;
+    public async calculateSamplingMean(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('samplings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('samplings');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        mean: { $avg: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    mean: { $avg: '$value' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].mean;
-        });
+        return result.length === 0 ? 0 : result[0].mean;
     }
 
-    public calculateSamplingMinimum(name: string): Promise<number> {
-        const self = this;
+    public async calculateSamplingMinimum(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('samplings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('samplings');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        minimum: { $min: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    minimum: { $min: '$value' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].minimum;
-        });
+        return result.length === 0 ? 0 : result[0].minimum;
     }
 
 
-    public calculateSamplingMaximum(name: string): Promise<number> {
-        const self = this;
+    public async calculateSamplingMaximum(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('samplings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('samplings');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        maximum: { $max: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    maximum: { $max: '$value' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].maximum;
-        });
+        return result.length === 0 ? 0 : result[0].maximum;
     }
 
-    public calculateSamplingStandardDeviation(name: string): Promise<number> {
-        const self = this;
+    public async calculateSamplingStandardDeviation(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('samplings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('samplings');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        standardDeviation: { $stdDevPop: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    standardDeviation: { $stdDevPop: '$value' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].standardDeviation;
-        });
+        return result.length === 0 ? 0 : result[0].standardDeviation;
     }
 
-    public saveTiming(timing: Timing): Promise<boolean> {
-        const self = this;
+    public async saveTiming(timing: Timing): Promise<boolean> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('timings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
+        const date: moment.Moment = moment(timing.timestamp);
 
-            const collection: mongo.Collection = db.collection('timings');
-
-            const date: moment.Moment = moment(timing.timestamp);
-
-            const result: any = yield collection.insertOne({
-                name: timing.name,
-                timestamp: timing.timestamp,
-                unit: timing.unit,
-                value: timing.value,
-                date: {
-                    day: date.date(),
-                    month: date.month() + 1,
-                    year: date.year(),
-                    hour: date.hour(),
-                    minute: date.minute(),
-                    second: date.second()
-                }
-            });
-
-            db.close();
-
-            return true;
+        const result: any = await collection.insertOne({
+            name: timing.name,
+            timestamp: timing.timestamp,
+            unit: timing.unit,
+            value: timing.value,
+            date: {
+                day: date.date(),
+                month: date.month() + 1,
+                year: date.year(),
+                hour: date.hour(),
+                minute: date.minute(),
+                second: date.second()
+            }
         });
+
+        db.close();
+
+        return true;
     }
 
-    public calculateTimingMean(name: string): Promise<number> {
-        const self = this;
+    public async calculateTimingMean(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('timings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('timings');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        mean: { $avg: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    mean: { $avg: '$value' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].mean;
-        });
+        return result.length === 0 ? 0 : result[0].mean;
     }
 
-    public calculateTimingMinimum(name: string): Promise<number> {
-        const self = this;
+    public async calculateTimingMinimum(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('timings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('timings');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        minimum: { $min: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    minimum: { $min: '$value' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].minimum;
-        });
+        return result.length === 0 ? 0 : result[0].minimum;
     }
 
 
-    public calculateTimingMaximum(name: string): Promise<number> {
-        const self = this;
+    public async calculateTimingMaximum(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('timings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('timings');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        maximum: { $max: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    maximum: { $max: '$value' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].maximum;
-        });
+        return result.length === 0 ? 0 : result[0].maximum;
     }
 
-    public calculateTimingStandardDeviation(name: string): Promise<number> {
-        const self = this;
+    public async calculateTimingStandardDeviation(name: string): Promise<number> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
-        return co(function* () {
+        const collection: mongo.Collection = db.collection('timings');
 
-            const db: mongo.Db = yield mongo.MongoClient.connect(self.uri);
-
-            const collection: mongo.Collection = db.collection('timings');
-
-            const result: any[] = yield collection.aggregate([
-                {
-                    $match: { name: name }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        standardDeviation: { $stdDevPop: '$value' },
-                        count: { $sum: 1 }
-                    }
+        const result: any[] = await collection.aggregate([
+            {
+                $match: { name: name }
+            },
+            {
+                $group: {
+                    _id: null,
+                    standardDeviation: { $stdDevPop: '$value' },
+                    count: { $sum: 1 }
                 }
-            ]).toArray();
+            }
+        ]).toArray();
 
-            db.close();
+        db.close();
 
-            return result.length === 0 ? 0 : result[0].standardDeviation;
-        });
+        return result.length === 0 ? 0 : result[0].standardDeviation;
     }
 
 }
