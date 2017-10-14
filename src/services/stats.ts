@@ -53,4 +53,14 @@ export class StatsService {
 
         return Math.sqrt(newMean);
     }
+
+    public recalculateStandardDeviation(sum: number, n: number, sumSquared: number): number {
+
+        const meanSum = sum / n;
+        const meanSumSquared = sumSquared / n;
+
+        const result = meanSumSquared - Math.pow(meanSum, 2);
+
+        return Math.sqrt(result);
+    }
 }

@@ -1,16 +1,14 @@
-// Imports repositories
-import { MetricRepository } from './../repositories/metric';
+// Imports interfaces
+import { IMetricRepository } from './../repositories/metric';
 
 // Import metric types
-import { Counter } from './../metric-types/counter';
+import { Data } from './../metric-types/data';
 import { Gauge } from './../metric-types/gauge';
-import { Sampling } from './../metric-types/sampling';
 import { Timing } from './../metric-types/timing';
 
 // Imports models
 import { Counter as CounterModel } from './../models/counter';
 import { Gauge as GaugeModel } from './../models/gauge';
-import { Sampling as SamplingModel } from './../models/sampling';
 import { Timing as TimingModel } from './../models/timing';
 
 // Imports services
@@ -20,29 +18,14 @@ export class MetricService {
 
     private statsService: StatsService = new StatsService();
 
-    constructor(private metricRepository: MetricRepository) {
+    constructor(private metricRepository: IMetricRepository) {
 
     }
 
-    public log(metric: any): Promise<boolean> {
+    public async log(metric: Data): Promise<boolean> {
+        await this.metricRepository.saveMetric(metric);
 
-        if (metric.type === 'counter') {
-            const counter = new Counter(metric.name, metric.value, metric.unit, metric.timestamp);
-            this.metricRepository.saveCounter(counter);
-        } else if (metric.type === 'gauge') {
-            const gauge = new Gauge(metric.name, metric.offset, metric.unit, metric.timestamp);
-            this.metricRepository.saveGauge(gauge);
-        } else if (metric.type === 'sampling') {
-            const sampling = new Sampling(metric.name, metric.value, metric.unit, metric.timestamp);
-            this.metricRepository.saveSampling(sampling);
-        } else if (metric.type === 'timing') {
-            const timing = new Timing(metric.name, metric.value, metric.unit, metric.timestamp);
-            this.metricRepository.saveTiming(timing);
-        } else {
-            throw new Error('Invalid metric type');
-        }
-
-        return Promise.resolve(true);
+        return true;
     }
 
     public async getCounter(name: string): Promise<CounterModel> {
@@ -61,26 +44,6 @@ export class MetricService {
         const model: GaugeModel = new GaugeModel(
             name,
             value,
-            null
-        );
-
-        return model;
-    }
-
-    public async getSampling(name: string): Promise<SamplingModel> {
-        const mean: number = await this.metricRepository.calculateSamplingMean(name);
-        const median: number = null;
-        const minimum: number = await this.metricRepository.calculateSamplingMinimum(name);
-        const maximum: number = await this.metricRepository.calculateSamplingMaximum(name);
-        const standardDeviation: number = await this.metricRepository.calculateSamplingStandardDeviation(name);
-
-        const model: SamplingModel = new SamplingModel(
-            name,
-            mean,
-            median,
-            minimum,
-            maximum,
-            standardDeviation,
             null
         );
 

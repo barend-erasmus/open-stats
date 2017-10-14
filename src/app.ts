@@ -1,92 +1,94 @@
-// https://github.com/etsy/statsd/blob/master/docs/metric_types.md
-
-// https://github.com/sivy/node-statsd
-
 // Imports
 import * as express from 'express';
 import * as http from 'http';
-import * as WebSocket from 'ws';
+
+import { TCPAdminInterface } from './tcp-admin-interface';
+import { WebSocketInterface } from './web-socket-interface';
+import { UDPInterface } from './udp-interface';
+
+import { IMetricRepository } from './repositories/metric';
+
+// Imports models
+import { Data } from './metric-types/data';
+import { Counter } from './models/counter';
+import { Gauge } from './models/gauge';
+import { Timing } from './models/timing';
 
 // Imports middleware
 import * as cors from 'cors';
+import * as bodyParser from 'body-parser';
 
 // Imports services
 import { MetricService } from './services/metric';
 
 // Imports repositories
-import { MetricRepository } from './repositories/metric';
+import { MetricRepository } from './repositories//memory-lite/metric';
 
-const metricService = new MetricService(new MetricRepository('mongodb://localhost:27017/open-stats'));
+const metricRepository: IMetricRepository = new MetricRepository();
+
+const metricService: MetricService = new MetricService(metricRepository);
 
 const app = express();
 
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({}));
 
-const server = http.createServer(app);
+// HTTP Server
+const httpServer = http.createServer(app);
 
-const wss = new WebSocket.Server({
-  server: server,
-  path: '/open-stats'
-});
+// TCP Admin Interface
+const tcpAdminInterface: TCPAdminInterface = new TCPAdminInterface('127.0.0.1', 8126, metricService);
+tcpAdminInterface.start();
 
-wss.on('connection', (ws: any) => {
-  ws.on('message', (message: string) => {
+// Web Socket Interface
+const websocketInterface: WebSocketInterface = new WebSocketInterface(httpServer, metricService);
 
-    const data = JSON.parse(message);
+// UDP Interface
+const udpInterface: UDPInterface = new UDPInterface('127.0.0.1', 8125, metricService, tcpAdminInterface);
+udpInterface.start();
 
-    if (data.type === 'test') {
-      console.log(message);
-    } else {
-      console.log(data.type);
-      metricService.log(data);
-    }
-  });
-});
 
-app.get('/log', async (req, res) => {
-  const data = req.body;
+// REST Interface
+app.post('/log', async (req, res) => {
+  const data: Data = req.body;
   await metricService.log(data);
   res.send('OK');
 });
 
 app.get('/counter', async (req, res) => {
-  const result = await metricService.getCounter(req.query.name);
+  const result: Counter = await metricService.getCounter(req.query.name);
   res.json(result);
 });
 
 app.get('/gauge', async (req, res) => {
-  const result = await metricService.getGauge(req.query.name);
-  res.json(result);
-});
-
-app.get('/sampling', async (req, res) => {
-  const result = await metricService.getSampling(req.query.name);
+  const result: Gauge = await metricService.getGauge(req.query.name);
   res.json(result);
 });
 
 app.get('/timing', async (req, res) => {
-  const result = await metricService.getTiming(req.query.name);
+  const result: Timing = await metricService.getTiming(req.query.name);
   res.json(result);
 });
 
 app.get('/list/counters/second', async (req, res) => {
-  const result = await metricService.listCountersPerSecond(req.query.name);
+  const result: Counter[] = await metricService.listCountersPerSecond(req.query.name);
   res.json(result);
 });
 
 app.get('/list/counters/minute', async (req, res) => {
-  const result = await metricService.listCountersPerMinute(req.query.name);
+  const result: Counter[] = await metricService.listCountersPerMinute(req.query.name);
   res.json(result);
 });
 
 app.get('/list/counters/hour', async (req, res) => {
-  const result = await metricService.listCountersPerHour(req.query.name);
+  const result: Counter[] = await metricService.listCountersPerHour(req.query.name);
   res.json(result);
 });
 
 app.get('/list/counters/day', async (req, res) => {
-  const result = await metricService.listCountersPerDay(req.query.name);
+  const result: Counter[] = await metricService.listCountersPerDay(req.query.name);
   res.json(result);
 });
 
-server.listen(3000);
+httpServer.listen(3000);
