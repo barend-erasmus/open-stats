@@ -34,7 +34,7 @@ export class MetricRepository implements IMetricRepository {
 
             if (existingMetric) {
                 await collection.updateOne({
-                    name: metric.name
+                    name: metric.name,
                 },
                     {
                         name: metric.name,
@@ -53,10 +53,9 @@ export class MetricRepository implements IMetricRepository {
 
             if (existingMetric) {
 
-
                 if (metric.value) {
                     await collection.updateOne({
-                        name: metric.name
+                        name: metric.name,
                     },
                         {
                             name: metric.name,
@@ -64,7 +63,7 @@ export class MetricRepository implements IMetricRepository {
                         });
                 } else if (metric.offset) {
                     await collection.updateOne({
-                        name: metric.name
+                        name: metric.name,
                     },
                         {
                             name: metric.name,
@@ -84,7 +83,7 @@ export class MetricRepository implements IMetricRepository {
 
             if (existingMetric) {
                 await collection.updateOne({
-                    name: metric.name
+                    name: metric.name,
                 },
                     {
                         count: existingMetric.count + 1,
