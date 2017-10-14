@@ -1,27 +1,27 @@
-// Imports
-import * as WebSocket from 'ws';
+// imports
+import * as WebSocket from "ws";
 
-// Imports services
-import { MetricService } from './services/metric';
+// imports services
+import { MetricService } from "./services/metric";
 
-// Imports models
-import { Data } from './metric-types/data';
+// imports models
+import { Data } from "./metric-types/data";
 
 export class WebSocketInterface {
-    
+
     private server: any;
 
     constructor(private httpServer: any, private metricService: MetricService) {
         this.server = new WebSocket.Server({
+            path: '/open-stats',
             server: this.httpServer,
-            path: '/open-stats'
         });
 
-        this.server.on('connection', this.onConnect);
+        this.server.on("connection", this.onConnect);
     }
 
     private onConnect(ws: any): void {
-        ws.on('message', this.onMessage);
+        ws.on("message", this.onMessage);
     }
 
     private onMessage(message: string): void {

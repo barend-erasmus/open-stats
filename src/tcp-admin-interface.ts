@@ -1,14 +1,14 @@
-// Imports
-import * as net from 'net';
+// imports
+import * as net from "net";
 
-// Imports models
-import { Data } from './metric-types/data';
-import { Counter } from './models/counter';
-import { Gauge } from './models/gauge';
-import { Timing } from './models/timing';
+// imports models
+import { Data } from "./metric-types/data";
+import { Counter } from "./models/counter";
+import { Gauge } from "./models/gauge";
+import { Timing } from "./models/timing";
 
-// Imports services
-import { MetricService } from './services/metric';
+// imports services
+import { MetricService } from "./services/metric";
 
 export class TCPAdminInterface {
 
@@ -23,10 +23,6 @@ export class TCPAdminInterface {
         this.server = net.createServer((socket: any) => this.onConnect(socket));
     }
 
-    private onConnect(socket: any): void {
-        this.sockets.push(socket);
-    }
-
     public start(): void {
         this.server.listen(this.port, this.host);
     }
@@ -34,13 +30,13 @@ export class TCPAdminInterface {
     public async sendUpdateToAllSockets(data: Data): Promise<void> {
         for (const socket of this.sockets) {
             try {
-                if (data.type === 'counter') {
+                if (data.type === "counter") {
                     const metric: Counter = await this.metricService.getCounter(data.name);
                     socket.write(`${metric.name}: ${metric.value}\r\n`);
-                } else if (data.type === 'gauge') {
+                } else if (data.type === "gauge") {
                     const metric: Gauge = await this.metricService.getGauge(data.name);
                     socket.write(`${metric.name}: ${metric.value}\r\n`);
-                } else if (data.type === 'timing') {
+                } else if (data.type === "timing") {
                     const metric: Timing = await this.metricService.getTiming(data.name);
                     socket.write(`${metric.name}.minimum: ${metric.minimum}\r\n`);
                     socket.write(`${metric.name}.maximum: ${metric.maximum}\r\n`);
@@ -48,8 +44,12 @@ export class TCPAdminInterface {
                     socket.write(`${metric.name}.stdDev: ${metric.standardDeviation}\r\n`);
                 }
             } catch (error) {
-                this.sockets.splice(this.sockets.indexOf(socket) ,1)
+                this.sockets.splice(this.sockets.indexOf(socket) , 1);
             }
         }
+    }
+
+    private onConnect(socket: any): void {
+        this.sockets.push(socket);
     }
 }

@@ -1,4 +1,4 @@
-import { Data } from './data';
+import { Data } from "./data";
 
 export class Gauge extends Data {
     constructor(
@@ -6,8 +6,8 @@ export class Gauge extends Data {
         value: number,
         offset: number,
         unit: string,
-        timestamp: number
+        timestamp: number,
     ) {
-        super('gauge', name, value, offset, unit, timestamp);
+        super("gauge", name, value, offset, unit, timestamp);
     }
 }

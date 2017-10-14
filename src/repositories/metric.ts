@@ -1,12 +1,12 @@
-// Imports
-import * as mongo from 'mongodb';
-import * as moment from 'moment';
+// imports
+import * as moment from "moment";
+import * as mongo from "mongodb";
 
-// Imports metric types
-import { Data } from './../metric-types/data';
-import { Counter } from './../metric-types/counter';
-import { Gauge } from './../metric-types/gauge';
-import { Timing } from './../metric-types/timing';
+// imports metric types
+import { Counter } from "./../metric-types/counter";
+import { Data } from "./../metric-types/data";
+import { Gauge } from "./../metric-types/gauge";
+import { Timing } from "./../metric-types/timing";
 
 export interface IMetricRepository {
 

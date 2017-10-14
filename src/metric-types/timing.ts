@@ -1,12 +1,12 @@
-import { Data } from './data';
+import { Data } from "./data";
 
 export class Timing extends Data {
     constructor(
         name: string,
         value: number,
         unit: string,
-        timestamp: number
+        timestamp: number,
     ) {
-        super('timing', name, value, null, unit, timestamp);
+        super("timing", name, value, null, unit, timestamp);
     }
 }

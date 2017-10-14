@@ -1,26 +1,25 @@
-// Imports
+// imports interfaces
+import { IMetricRepository } from "./../metric";
 
-// Imports interfaces
-import { IMetricRepository } from './../metric';
+import { StatsService } from "./../../services/stats";
 
-import { StatsService } from './../../services/stats';
-
-// Imports metric types
-import { Data } from './../../metric-types/data';
-import { Counter } from './../../metric-types/counter';
-import { Gauge } from './../../metric-types/gauge';
-import { Timing } from './../../metric-types/timing';
+// imports metric types
+import { Counter } from "./../../metric-types/counter";
+import { Data } from "./../../metric-types/data";
+import { Gauge } from "./../../metric-types/gauge";
+import { Timing } from "./../../metric-types/timing";
 
 export class MetricRepository implements IMetricRepository {
 
-    private statsService: StatsService = new StatsService();
     private static counters: {} = {};
     private static gauges: {} = {};
     private static timings: {} = {};
 
+    private statsService: StatsService = new StatsService();
+
     public async saveMetric(metric: Data): Promise<boolean> {
 
-        if (metric.type === 'counter') {
+        if (metric.type === "counter") {
             const existingMetric = MetricRepository.counters[metric.name];
 
             if (existingMetric) {
@@ -28,7 +27,7 @@ export class MetricRepository implements IMetricRepository {
             } else {
                 MetricRepository.counters[metric.name] = metric.value;
             }
-        } else if (metric.type === 'gauge') {
+        } else if (metric.type === "gauge") {
             const existingMetric = MetricRepository.gauges[metric.name];
 
             if (existingMetric) {
@@ -40,7 +39,7 @@ export class MetricRepository implements IMetricRepository {
             } else {
                 MetricRepository.gauges[metric.name] = metric.value;
             }
-        } else if (metric.type === 'timing') {
+        } else if (metric.type === "timing") {
             const existingMetric = MetricRepository.timings[metric.name];
             if (existingMetric) {
                 MetricRepository.timings[metric.name].sum += metric.value;
@@ -50,11 +49,11 @@ export class MetricRepository implements IMetricRepository {
                 MetricRepository.timings[metric.name].count += 1;
             } else {
                 MetricRepository.timings[metric.name] = {
+                    count: 1,
+                    maximum: metric.value,
+                    minimum: metric.value,
                     sum: metric.value,
                     sumSquared: Math.pow(metric.value, 2),
-                    minimum: metric.value,
-                    maximum: metric.value,
-                    count: 1
                 };
             }
         }

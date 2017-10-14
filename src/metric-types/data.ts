@@ -5,7 +5,7 @@ export class Data {
         public value: number,
         public offset: number,
         public unit: string,
-        public timestamp: number
+        public timestamp: number,
     ) {
 
     }

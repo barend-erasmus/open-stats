@@ -6,7 +6,7 @@ export class Timing {
         public minimum: number,
         public maximum: number,
         public standardDeviation: number,
-        public unit: string
+        public unit: string,
     ) {
 
     }

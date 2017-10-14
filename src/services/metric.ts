@@ -1,18 +1,18 @@
-// Imports interfaces
-import { IMetricRepository } from './../repositories/metric';
+// imports interfaces
+import { IMetricRepository } from "./../repositories/metric";
 
-// Import metric types
-import { Data } from './../metric-types/data';
-import { Gauge } from './../metric-types/gauge';
-import { Timing } from './../metric-types/timing';
+// import metric types
+import { Data } from "./../metric-types/data";
+import { Gauge } from "./../metric-types/gauge";
+import { Timing } from "./../metric-types/timing";
 
-// Imports models
-import { Counter as CounterModel } from './../models/counter';
-import { Gauge as GaugeModel } from './../models/gauge';
-import { Timing as TimingModel } from './../models/timing';
+// imports models
+import { Counter as CounterModel } from "./../models/counter";
+import { Gauge as GaugeModel } from "./../models/gauge";
+import { Timing as TimingModel } from "./../models/timing";
 
-// Imports services
-import { StatsService } from './stats';
+// imports services
+import { StatsService } from "./stats";
 
 export class MetricService {
 
@@ -33,7 +33,7 @@ export class MetricService {
         const model: CounterModel = new CounterModel(
             name,
             sum,
-            null
+            null,
         );
 
         return model;
@@ -44,7 +44,7 @@ export class MetricService {
         const model: GaugeModel = new GaugeModel(
             name,
             value,
-            null
+            null,
         );
 
         return model;
@@ -64,7 +64,7 @@ export class MetricService {
             minimum,
             maximum,
             standardDeviation,
-            null
+            null,
         );
 
         return model;

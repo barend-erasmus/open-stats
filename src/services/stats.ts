@@ -1,9 +1,9 @@
 export class StatsService {
 
     public calculateMean(data: number[]): number {
-        let total = 0;
+        let total: number = 0;
 
-        for (let i = 0; i < data.length; i += 1) {
+        for (let i: number = 0; i < data.length; i += 1) {
             total += data[i];
         }
         return total / data.length;
@@ -35,9 +35,9 @@ export class StatsService {
     }
 
     public calculateSum(data: number[]): number {
-        let total = 0;
+        let total: number = 0;
 
-        for (let i = 0; i < data.length; i += 1) {
+        for (let i: number = 0; i < data.length; i += 1) {
             total += data[i];
         }
 
@@ -45,7 +45,7 @@ export class StatsService {
     }
 
     public calculateStandardDeviation(data: number[]): number {
-        const mean = this.calculateMean(data);
+        const mean: number = this.calculateMean(data);
 
         const a: number[] = data.map((x) => Math.pow(x - mean, 2));
 
@@ -56,10 +56,10 @@ export class StatsService {
 
     public recalculateStandardDeviation(sum: number, n: number, sumSquared: number): number {
 
-        const meanSum = sum / n;
-        const meanSumSquared = sumSquared / n;
+        const meanSum: number = sum / n;
+        const meanSumSquared: number = sumSquared / n;
 
-        const result = meanSumSquared - Math.pow(meanSum, 2);
+        const result: number = meanSumSquared - Math.pow(meanSum, 2);
 
         return Math.sqrt(result);
     }
