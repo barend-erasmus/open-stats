@@ -1,0 +1,40 @@
+{
+    "machine": {
+        "host": "$host",
+        "username": "$username",
+        "password": "$password"
+    },
+    "commands": [
+        "sudo apt-get update",
+        "curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash -",
+        "sudo apt-get install -y nodejs",
+
+        "npm install pm2 -g",
+
+        "mkdir /logs",
+        "npm --prefix /opt/open-stats install",
+        "pm2 stop open-stats",
+        "pm2 start /opt/open-stats/src/app.js --name open-stats -- --prod --port 9011",
+        "sudo service nginx reload"
+    ],
+    "directories": [
+        {
+            "source": "$workspace/src",
+            "destination": "/opt/open-stats/src"
+        },
+        {
+            "source": "$workspace/coverage",
+            "destination": "/opt/open-stats/coverage"
+        }
+    ],
+    "files": [
+        {
+            "source": "$workspace/package.json",
+            "destination": "/opt/open-stats/package.json"
+        },
+        {
+            "source": "$workspace/nginx.conf",
+            "destination": "/etc/nginx/sites-enabled/open-stats"
+        }
+    ]
+}

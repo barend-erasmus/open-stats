@@ -1,6 +1,7 @@
 // imports
 import * as express from "express";
 import * as http from "http";
+import * as yargs from 'yargs';
 
 import { TCPAdminInterface } from "./tcp-admin-interface";
 import { UDPInterface } from "./udp-interface";
@@ -21,8 +22,10 @@ import * as cors from "cors";
 // imports services
 import { MetricService } from "./services/metric";
 
-// Imports repositories
+// imports repositories
 import { MetricRepository } from "./repositories//memory-lite/metric";
+
+const argv = yargs.argv;
 
 const metricRepository: IMetricRepository = new MetricRepository();
 
@@ -90,4 +93,4 @@ app.get("/list/counters/day", async (req, res) => {
   res.json(result);
 });
 
-httpServer.listen(3000);
+httpServer.listen(argv.port || 3000);
