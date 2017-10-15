@@ -34,6 +34,9 @@
             data.forEach((x) => {
                 chart.data.labels.push(x.timestamp);
                 chart.data.datasets[0].data.push(x.y);
+
+                chart.data.labels.splice(0, 1);
+                chart.data.datasets[0].data.splice(0, 1);
             });
 
             chart.update();
@@ -53,6 +56,19 @@
                 }]
             },
             options: {
+                elements: {
+                    point:{
+                        radius: 0
+                    }
+                },
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 20
+                        }
+                    }]
+                }
             }
         });
     }

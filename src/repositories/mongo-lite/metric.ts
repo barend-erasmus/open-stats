@@ -14,9 +14,7 @@ import { Timing } from "./../../metric-types/timing";
 
 export class MetricRepository implements IMetricRepository {
 
-    private static counters: {} = {};
-    private static gauges: {} = {};
-    private static timings: {} = {};
+    private db: mongo.Db;
 
     private statsService: StatsService = new StatsService();
 
@@ -25,10 +23,12 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async saveMetric(metric: Data): Promise<boolean> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
         if (metric.type === "counter") {
-            const collection: mongo.Collection = db.collection("counters");
+            const collection: mongo.Collection = this.db.collection("counters");
 
             const existingMetric = await collection.findOne({ name: metric.name });
 
@@ -47,7 +47,7 @@ export class MetricRepository implements IMetricRepository {
                 });
             }
         } else if (metric.type === "gauge") {
-            const collection: mongo.Collection = db.collection("gauges");
+            const collection: mongo.Collection = this.db.collection("gauges");
 
             const existingMetric = await collection.findOne({ name: metric.name });
 
@@ -77,7 +77,7 @@ export class MetricRepository implements IMetricRepository {
                 });
             }
         } else if (metric.type === "timing") {
-            const collection: mongo.Collection = db.collection("timings");
+            const collection: mongo.Collection = this.db.collection("timings");
 
             const existingMetric = await collection.findOne({ name: metric.name });
 
@@ -107,8 +107,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async listCounterNames(): Promise<string[]> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-        const collection: mongo.Collection = db.collection("counters");
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("counters");
 
         const result: any[] = await collection.find({}, { name: 1 }).toArray();
 
@@ -116,8 +119,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async listGaugeNames(): Promise<string[]> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-        const collection: mongo.Collection = db.collection("gauges");
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("gauges");
 
         const result: any[] = await collection.find({}, { name: 1 }).toArray();
 
@@ -125,8 +131,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async listTimingNames(): Promise<string[]> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-        const collection: mongo.Collection = db.collection("timings");
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("timings");
 
         const result: any[] = await collection.find({}, { name: 1 }).toArray();
 
@@ -137,13 +146,16 @@ export class MetricRepository implements IMetricRepository {
         return true;
     }
 
-    public async getSeriesData(name: string, timestamp: number): Promise<{x: number, y: number}[]> {
+    public async getSeriesData(name: string, timestamp: number): Promise<{ x: number, y: number }[]> {
         return [];
     }
 
     public async calculateCounterSum(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-        const collection: mongo.Collection = db.collection("counters");
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("counters");
 
         const metric = await collection.findOne({ name });
 
@@ -151,8 +163,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async calculateGaugeValue(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-        const collection: mongo.Collection = db.collection("gauges");
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("gauges");
 
         const metric = await collection.findOne({ name });
 
@@ -160,8 +175,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async calculateTimingMean(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-        const collection: mongo.Collection = db.collection("timings");
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("timings");
 
         const metric = await collection.findOne({ name });
 
@@ -169,8 +187,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async calculateTimingMinimum(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-        const collection: mongo.Collection = db.collection("timings");
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("timings");
 
         const metric = await collection.findOne({ name });
 
@@ -178,8 +199,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async calculateTimingMaximum(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-        const collection: mongo.Collection = db.collection("timings");
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("timings");
 
         const metric = await collection.findOne({ name });
 
@@ -187,8 +211,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async calculateTimingStandardDeviation(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-        const collection: mongo.Collection = db.collection("timings");
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("timings");
 
         const metric = await collection.findOne({ name });
 

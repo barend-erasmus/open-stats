@@ -13,14 +13,18 @@ import { Timing } from "./../../metric-types/timing";
 
 export class MetricRepository implements IMetricRepository {
 
+    private db: mongo.Db;
+
     constructor(private uri: string) {
 
     }
 
     public async saveMetric(metric: Data): Promise<boolean> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const date: moment.Moment = moment(metric.timestamp);
 
@@ -40,15 +44,15 @@ export class MetricRepository implements IMetricRepository {
             value: metric.value,
         });
 
-        db.close();
-
         return true;
     }
 
     public async listCounterNames(): Promise<string[]> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const result: string[] = await collection.distinct('name', { type: 'counter' });
 
@@ -56,9 +60,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async listGaugeNames(): Promise<string[]> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const result: string[] = await collection.distinct('name', { type: 'gauge' });
 
@@ -66,9 +72,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async listTimingNames(): Promise<string[]> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const result: string[] = await collection.distinct('name', { type: 'timing' });
 
@@ -76,9 +84,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async saveSeriesData(name: string, value: number, timestamp: number): Promise<boolean> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("series");
+        const collection: mongo.Collection = this.db.collection("series");
 
         const result: any = await collection.insertOne({
             name,
@@ -86,28 +96,30 @@ export class MetricRepository implements IMetricRepository {
             value,
         });
 
-        db.close();
-
         return true;
     }
 
     public async getSeriesData(name: string, timestamp: number): Promise<{ x: number, y: number }[]> {
 
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("series");
+        const collection: mongo.Collection = this.db.collection("series");
 
         const result: any[] = await collection.find({
             name,
             timestamp: { $gt: timestamp }
         })
-        .sort({
-            timestamp: 1
-        }).toArray();
+            .sort({
+                timestamp: -1
+            })
+            .limit(1800)
+            .toArray();
 
-        db.close();
-
-        return result.map((x) => {
+        return result.sort((a, b) => {
+            return a.timestamp - b.timestamp;
+        }).map((x) => {
             return {
                 timestamp: moment(x.timestamp).format('YYYY/MM/DD HH:mm:ss'),
                 x: x.timestamp,
@@ -117,9 +129,11 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async calculateCounterSum(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const result: any[] = await collection.aggregate([
             {
@@ -134,15 +148,15 @@ export class MetricRepository implements IMetricRepository {
             },
         ]).toArray();
 
-        db.close();
-
         return result.length === 0 ? 0 : result[0].sum;
     }
 
     public async calculateGaugeValue(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const result: any[] = await collection.aggregate([
             {
@@ -157,15 +171,15 @@ export class MetricRepository implements IMetricRepository {
             },
         ]).toArray();
 
-        db.close();
-
         return result.length === 0 ? 0 : result[0].value;
     }
 
     public async calculateTimingMean(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const result: any[] = await collection.aggregate([
             {
@@ -180,15 +194,15 @@ export class MetricRepository implements IMetricRepository {
             },
         ]).toArray();
 
-        db.close();
-
         return result.length === 0 ? 0 : result[0].mean;
     }
 
     public async calculateTimingMinimum(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const result: any[] = await collection.aggregate([
             {
@@ -203,15 +217,15 @@ export class MetricRepository implements IMetricRepository {
             },
         ]).toArray();
 
-        db.close();
-
         return result.length === 0 ? 0 : result[0].minimum;
     }
 
     public async calculateTimingMaximum(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const result: any[] = await collection.aggregate([
             {
@@ -226,15 +240,15 @@ export class MetricRepository implements IMetricRepository {
             },
         ]).toArray();
 
-        db.close();
-
         return result.length === 0 ? 0 : result[0].maximum;
     }
 
     public async calculateTimingStandardDeviation(name: string): Promise<number> {
-        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
 
-        const collection: mongo.Collection = db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("metrics");
 
         const result: any[] = await collection.aggregate([
             {
@@ -248,8 +262,6 @@ export class MetricRepository implements IMetricRepository {
                 },
             },
         ]).toArray();
-
-        db.close();
 
         return result.length === 0 ? 0 : result[0].standardDeviation;
     }
