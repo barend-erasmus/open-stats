@@ -1,43 +1,31 @@
 // imports
-import * as express from "express";
 import * as http from "http";
+import * as express from "express";
 import * as yargs from 'yargs';
+import * as cron from 'cron';
 
 import { TCPAdminInterface } from "./tcp-admin-interface";
-import { UDPInterface } from "./udp-interface";
 import { WebSocketInterface } from "./web-socket-interface";
-
-import { IMetricRepository } from "./repositories/metric";
-
-// imports models
-import { Data } from "./metric-types/data";
-import { Counter } from "./models/counter";
-import { Gauge } from "./models/gauge";
-import { Timing } from "./models/timing";
-
-// imports middleware
-import * as bodyParser from "body-parser";
-import * as cors from "cors";
+import { UDPInterface } from "./udp-interface";
+import { RESTInterface } from "./rest-interface";
 
 // imports services
 import { MetricService } from "./services/metric";
 
 // imports repositories
-import { MetricRepository } from "./repositories//memory-lite/metric";
+import { IMetricRepository } from "./repositories/metric";
+import { MetricRepository as MemoryLiteMetricRepository } from "./repositories//memory-lite/metric";
+import { MetricRepository } from "./repositories//mongo/metric";
 
 const argv = yargs.argv;
 
-const metricRepository: IMetricRepository = new MetricRepository();
+// const metricRepository: IMetricRepository = new MemoryLiteMetricRepository();
+const metricRepository: IMetricRepository = new MetricRepository('mongodb://localhost:27017/open-stats');
 
 const metricService: MetricService = new MetricService(metricRepository);
 
-const app = express();
-
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json({}));
-
 // HTTP Server
+const app = express();
 const httpServer = http.createServer(app);
 
 // TCP Admin Interface
@@ -45,52 +33,44 @@ const tcpAdminInterface: TCPAdminInterface = new TCPAdminInterface("0.0.0.0", 81
 tcpAdminInterface.start();
 
 // Web Socket Interface
-const websocketInterface: WebSocketInterface = new WebSocketInterface(httpServer, metricService);
+const websocketInterface: WebSocketInterface = new WebSocketInterface(httpServer, metricService, tcpAdminInterface);
 
 // UDP Interface
 const udpInterface: UDPInterface = new UDPInterface("0.0.0.0", 8125, metricService, tcpAdminInterface);
 udpInterface.start();
 
 // REST Interface
-app.post("/log", async (req, res) => {
-  const data: Data = req.body;
-  await metricService.log(data);
-  res.send("OK");
-});
-
-app.get("/counter", async (req, res) => {
-  const result: Counter = await metricService.getCounter(req.query.name);
-  res.json(result);
-});
-
-app.get("/gauge", async (req, res) => {
-  const result: Gauge = await metricService.getGauge(req.query.name);
-  res.json(result);
-});
-
-app.get("/timing", async (req, res) => {
-  const result: Timing = await metricService.getTiming(req.query.name);
-  res.json(result);
-});
-
-app.get("/list/counters/second", async (req, res) => {
-  const result: Counter[] = await metricService.listCountersPerSecond(req.query.name);
-  res.json(result);
-});
-
-app.get("/list/counters/minute", async (req, res) => {
-  const result: Counter[] = await metricService.listCountersPerMinute(req.query.name);
-  res.json(result);
-});
-
-app.get("/list/counters/hour", async (req, res) => {
-  const result: Counter[] = await metricService.listCountersPerHour(req.query.name);
-  res.json(result);
-});
-
-app.get("/list/counters/day", async (req, res) => {
-  const result: Counter[] = await metricService.listCountersPerDay(req.query.name);
-  res.json(result);
-});
+const restInterface: RESTInterface = new RESTInterface(app, metricService, tcpAdminInterface);
 
 httpServer.listen(argv.port || 3000);
+
+const job = new cron.CronJob('*/10 * * * * *', async () => {
+
+    const counterNames: string[] = await metricService.listCounterNames();
+    const gaugeNames: string[] = await metricService.listGaugeNames();
+    const timingNames: string[] = await metricService.listTimingNames();
+
+    for (const name of counterNames) {
+        const counter = await metricService.getCounter(name);
+
+        await metricRepository.saveSeriesData(name, counter.value, new Date().getTime());
+    }
+
+    for (const name of gaugeNames) {
+        const gauge = await metricService.getGauge(name);
+
+        await metricRepository.saveSeriesData(name, gauge.value, new Date().getTime());
+    }
+
+    for (const name of timingNames) {
+        const timing = await metricService.getTiming(name);
+        const timestamp: number = new Date().getTime();
+
+        await metricRepository.saveSeriesData(`${name}.minimum`, timing.minimum, timestamp);
+        await metricRepository.saveSeriesData(`${name}.maximum`, timing.maximum, timestamp);
+        await metricRepository.saveSeriesData(`${name}.mean`, timing.mean, timestamp);
+        await metricRepository.saveSeriesData(`${name}.stdDev`, timing.standardDeviation, timestamp);
+    }
+}, null, true);
+
+job.start();

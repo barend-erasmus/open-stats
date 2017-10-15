@@ -12,15 +12,17 @@ export interface IMetricRepository {
 
     saveMetric(metric: Data): Promise<boolean>;
 
+    listCounterNames(): Promise<string[]>;
+
+    listGaugeNames(): Promise<string[]>;
+
+    listTimingNames(): Promise<string[]>;
+
+    saveSeriesData(name: string, value: number, timestamp: number): Promise<boolean>;
+
+    getSeriesData(name: string, timestamp: number): Promise<{x: number, y: number}[]>;
+
     calculateCounterSum(name: string): Promise<number>;
-
-    listCountersPerSecond(name: string): Promise<Counter[]>;
-
-    listCountersPerMinute(name: string): Promise<Counter[]>;
-
-    listCountersPerHour(name: string): Promise<Counter[]>;
-
-    listCountersPerDay(name: string): Promise<Counter[]>;
 
     calculateGaugeValue(name: string): Promise<number>;
 

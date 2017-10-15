@@ -45,6 +45,77 @@ export class MetricRepository implements IMetricRepository {
         return true;
     }
 
+    public async listCounterNames(): Promise<string[]> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+
+        const collection: mongo.Collection = db.collection("metrics");
+
+        const result: string[] = await collection.distinct('name', { type: 'counter' });
+
+        return result;
+    }
+
+    public async listGaugeNames(): Promise<string[]> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+
+        const collection: mongo.Collection = db.collection("metrics");
+
+        const result: string[] = await collection.distinct('name', { type: 'gauge' });
+
+        return result;
+    }
+
+    public async listTimingNames(): Promise<string[]> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+
+        const collection: mongo.Collection = db.collection("metrics");
+
+        const result: string[] = await collection.distinct('name', { type: 'timing' });
+
+        return result;
+    }
+
+    public async saveSeriesData(name: string, value: number, timestamp: number): Promise<boolean> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+
+        const collection: mongo.Collection = db.collection("series");
+
+        const result: any = await collection.insertOne({
+            name,
+            timestamp,
+            value,
+        });
+
+        db.close();
+
+        return true;
+    }
+
+    public async getSeriesData(name: string, timestamp: number): Promise<{ x: number, y: number }[]> {
+
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+
+        const collection: mongo.Collection = db.collection("series");
+
+        const result: any[] = await collection.find({
+            name,
+            timestamp: { $gt: timestamp }
+        })
+        .sort({
+            timestamp: 1
+        }).toArray();
+
+        db.close();
+
+        return result.map((x) => {
+            return {
+                timestamp: moment(x.timestamp).format('YYYY/MM/DD HH:mm:ss'),
+                x: x.timestamp,
+                y: x.value,
+            };
+        });
+    }
+
     public async calculateCounterSum(name: string): Promise<number> {
         const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
 
@@ -66,50 +137,6 @@ export class MetricRepository implements IMetricRepository {
         db.close();
 
         return result.length === 0 ? 0 : result[0].sum;
-    }
-
-    public listCountersPerSecond(name: string): Promise<Counter[]> {
-        return this.listCounters(name, {
-            day: "$date.day",
-            hour: "$date.hour",
-            minute: "$date.minute",
-            month: "$date.month",
-            second: "$date.second",
-            year: "$date.year",
-        });
-    }
-
-    public listCountersPerMinute(name: string): Promise<Counter[]> {
-        return this.listCounters(name, {
-            day: "$date.day",
-            hour: "$date.hour",
-            minute: "$date.minute",
-            month: "$date.month",
-            second: 0,
-            year: "$date.year",
-        });
-    }
-
-    public listCountersPerHour(name: string): Promise<Counter[]> {
-        return this.listCounters(name, {
-            day: "$date.day",
-            hour: "$date.hour",
-            minute: 0,
-            month: "$date.month",
-            second: 0,
-            year: "$date.year",
-        });
-    }
-
-    public listCountersPerDay(name: string): Promise<Counter[]> {
-        return this.listCounters(name, {
-            day: "$date.day",
-            hour: 0,
-            minute: 0,
-            month: "$date.month",
-            second: 0,
-            year: "$date.year",
-        });
     }
 
     public async calculateGaugeValue(name: string): Promise<number> {
@@ -226,29 +253,4 @@ export class MetricRepository implements IMetricRepository {
 
         return result.length === 0 ? 0 : result[0].standardDeviation;
     }
-
-    private async listCounters(name: string, group: { day: string | number, month: string | number, year: string | number, hour: string | number, minute: string | number, second: string | number }): Promise<Counter[]> {
-
-                const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
-
-                const collection: mongo.Collection = db.collection("metrics");
-
-                const result: any[] = await collection.aggregate([
-                    {
-                        $match: { name, type: "counter" },
-                    },
-                    {
-                        $group: {
-                            _id: group,
-                            count: { $sum: 1 },
-                            sum: { $sum: "$value" },
-                        },
-                    },
-                ])
-                    .toArray();
-
-                db.close();
-
-                return result.map((x) => new Counter(name, x.sum, null, new Date(x._id.year, x._id.month - 1, x._id.day, x._id.hour, x._id.minute, x._id.second).getTime()));
-            }
 }

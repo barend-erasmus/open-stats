@@ -1,0 +1,67 @@
+<div class="row">
+    <canvas id="chart"></canvas>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+<script>
+    var ctx = document.getElementById("chart").getContext('2d');
+    var name = getQueryStringParameter('name');
+    var chart;
+    var lastTimestamp = 0;
+
+    initialize();
+
+    function initialize() {
+        $.get(`/series?name=${name}&timestamp=0`, function (data) {
+            initializeChart(data);
+
+            if (data.length === 0) {
+                return;
+            }
+
+            lastTimestamp = data[data.length - 1].x;
+
+            setInterval(updateChart, 5000);
+        });
+    }
+
+    function updateChart() {
+        $.get(`/series?name=${name}&timestamp=${lastTimestamp}`, function (data) {
+
+            if (data.length === 0) {
+                return;
+            }
+
+            data.forEach((x) => {
+                chart.data.labels.push(x.timestamp);
+                chart.data.datasets[0].data.push(x.y);
+            });
+
+            chart.update();
+
+            lastTimestamp = data[data.length - 1].x;
+        });
+    }
+
+    function initializeChart(data) {
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map((x) => x.timestamp),
+                datasets: [{
+                    label: name,
+                    data: data.map((x) => x.y)
+                }]
+            },
+            options: {
+            }
+        });
+    }
+
+    function getQueryStringParameter(field, ) {
+        var href = window.location.href;
+        var reg = new RegExp('[?&]' + field + '=([^&#]*)', 'i');
+        var string = reg.exec(href);
+        return string ? string[1] : null;
+    };
+
+</script>

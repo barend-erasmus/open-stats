@@ -1,6 +1,8 @@
 // imports
 import * as WebSocket from "ws";
 
+import { TCPAdminInterface } from "./tcp-admin-interface";
+
 // imports services
 import { MetricService } from "./services/metric";
 
@@ -11,7 +13,10 @@ export class WebSocketInterface {
 
     private server: any;
 
-    constructor(private httpServer: any, private metricService: MetricService) {
+    constructor(
+        private httpServer: any,
+        private metricService: MetricService,
+        private tcpAdminInterface: TCPAdminInterface) {
         this.server = new WebSocket.Server({
             path: '/open-stats',
             server: this.httpServer,
@@ -21,11 +26,13 @@ export class WebSocketInterface {
     }
 
     private onConnect(ws: any): void {
-        ws.on("message", this.onMessage);
+        ws.on("message", (message) => this.onMessage(message));
     }
 
-    private onMessage(message: string): void {
+    private async onMessage(message: string): Promise<void> {
         const data: Data = JSON.parse(message);
-        this.metricService.log(data);
+        await this.metricService.log(data);
+
+        await this.tcpAdminInterface.sendUpdateToAllSockets(data);
     }
 }

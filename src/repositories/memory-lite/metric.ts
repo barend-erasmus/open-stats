@@ -60,28 +60,32 @@ export class MetricRepository implements IMetricRepository {
 
         return true;
     }
+    
+    public async listCounterNames(): Promise<string[]> {
+        return Object.keys(MetricRepository.counters);
+    }
 
+    public async listGaugeNames(): Promise<string[]> {
+        return Object.keys(MetricRepository.gauges);
+    }
+
+    public async listTimingNames(): Promise<string[]> {
+        return Object.keys(MetricRepository.timings);
+    }
+
+    public async saveSeriesData(name: string, value: number, timestamp: number): Promise<boolean> {
+        return true;
+    }
+
+    public async getSeriesData(name: string, timestamp: number): Promise<{x: number, y: number}[]> {
+        return [];
+    }
+    
     public async calculateCounterSum(name: string): Promise<number> {
 
         const metric = MetricRepository.counters[name];
 
         return metric ? metric : 0;
-    }
-
-    public async listCountersPerSecond(name: string): Promise<Counter[]> {
-        return [];
-    }
-
-    public async listCountersPerMinute(name: string): Promise<Counter[]> {
-        return [];
-    }
-
-    public async listCountersPerHour(name: string): Promise<Counter[]> {
-        return [];
-    }
-
-    public async listCountersPerDay(name: string): Promise<Counter[]> {
-        return [];
     }
 
     public async calculateGaugeValue(name: string): Promise<number> {

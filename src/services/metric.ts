@@ -70,19 +70,19 @@ export class MetricService {
         return model;
     }
 
-    public listCountersPerSecond(name: string): Promise<CounterModel[]> {
-        return this.metricRepository.listCountersPerSecond(name);
+    public async listCounterNames(): Promise<string[]> {
+        return this.metricRepository.listCounterNames();
     }
 
-    public listCountersPerMinute(name: string): Promise<CounterModel[]> {
-        return this.metricRepository.listCountersPerMinute(name);
+    public async listGaugeNames(): Promise<string[]> {
+        return this.metricRepository.listGaugeNames();
     }
 
-    public listCountersPerHour(name: string): Promise<CounterModel[]> {
-        return this.metricRepository.listCountersPerHour(name);
+    public async listTimingNames(): Promise<string[]> {
+        return this.metricRepository.listTimingNames();
     }
 
-    public listCountersPerDay(name: string): Promise<CounterModel[]> {
-        return this.metricRepository.listCountersPerDay(name);
+    public async getSeriesData(name: string, timestamp: number): Promise<{x: number, y: number}[]> {
+        return this.metricRepository.getSeriesData(name, timestamp);
     }
 }

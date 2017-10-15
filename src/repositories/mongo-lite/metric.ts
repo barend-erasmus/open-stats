@@ -106,6 +106,41 @@ export class MetricRepository implements IMetricRepository {
         return true;
     }
 
+    public async listCounterNames(): Promise<string[]> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        const collection: mongo.Collection = db.collection("counters");
+
+        const result: any[] = await collection.find({}, { name: 1 }).toArray();
+
+        return result.map((x) => x.name);
+    }
+
+    public async listGaugeNames(): Promise<string[]> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        const collection: mongo.Collection = db.collection("gauges");
+
+        const result: any[] = await collection.find({}, { name: 1 }).toArray();
+
+        return result.map((x) => x.name);
+    }
+
+    public async listTimingNames(): Promise<string[]> {
+        const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
+        const collection: mongo.Collection = db.collection("timings");
+
+        const result: any[] = await collection.find({}, { name: 1 }).toArray();
+
+        return result.map((x) => x.name);
+    }
+
+    public async saveSeriesData(name: string, value: number, timestamp: number): Promise<boolean> {
+        return true;
+    }
+
+    public async getSeriesData(name: string, timestamp: number): Promise<{x: number, y: number}[]> {
+        return [];
+    }
+
     public async calculateCounterSum(name: string): Promise<number> {
         const db: mongo.Db = await mongo.MongoClient.connect(this.uri);
         const collection: mongo.Collection = db.collection("counters");
@@ -113,22 +148,6 @@ export class MetricRepository implements IMetricRepository {
         const metric = await collection.findOne({ name });
 
         return metric ? metric.value : 0;
-    }
-
-    public async listCountersPerSecond(name: string): Promise<Counter[]> {
-        return [];
-    }
-
-    public async listCountersPerMinute(name: string): Promise<Counter[]> {
-        return [];
-    }
-
-    public async listCountersPerHour(name: string): Promise<Counter[]> {
-        return [];
-    }
-
-    public async listCountersPerDay(name: string): Promise<Counter[]> {
-        return [];
     }
 
     public async calculateGaugeValue(name: string): Promise<number> {
