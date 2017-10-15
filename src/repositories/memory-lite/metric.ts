@@ -60,7 +60,7 @@ export class MetricRepository implements IMetricRepository {
 
         return true;
     }
-    
+
     public async listCounterNames(): Promise<string[]> {
         return Object.keys(MetricRepository.counters);
     }
@@ -77,10 +77,10 @@ export class MetricRepository implements IMetricRepository {
         return true;
     }
 
-    public async getSeriesData(name: string, timestamp: number): Promise<{x: number, y: number}[]> {
+    public async getSeriesData(name: string, timestamp: number): Promise<Array<{x: number, y: number}>> {
         return [];
     }
-    
+
     public async calculateCounterSum(name: string): Promise<number> {
 
         const metric = MetricRepository.counters[name];

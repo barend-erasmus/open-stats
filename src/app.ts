@@ -1,21 +1,21 @@
 // imports
-import * as http from "http";
-import * as express from "express";
-import * as yargs from 'yargs';
 import * as cron from 'cron';
+import * as express from "express";
+import * as http from "http";
+import * as yargs from 'yargs';
 
-import { TCPAdminInterface } from "./tcp-admin-interface";
-import { WebSocketInterface } from "./web-socket-interface";
-import { UDPInterface } from "./udp-interface";
 import { RESTInterface } from "./rest-interface";
+import { TCPAdminInterface } from "./tcp-admin-interface";
+import { UDPInterface } from "./udp-interface";
+import { WebSocketInterface } from "./web-socket-interface";
 
 // imports services
 import { MetricService } from "./services/metric";
 
 // imports repositories
-import { IMetricRepository } from "./repositories/metric";
 import { MetricRepository as MemoryLiteMetricRepository } from "./repositories//memory-lite/metric";
 import { MetricRepository } from "./repositories//mongo/metric";
+import { IMetricRepository } from "./repositories/metric";
 
 const argv = yargs.argv;
 

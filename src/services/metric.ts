@@ -82,7 +82,7 @@ export class MetricService {
         return this.metricRepository.listTimingNames();
     }
 
-    public async getSeriesData(name: string, timestamp: number): Promise<{x: number, y: number}[]> {
+    public async getSeriesData(name: string, timestamp: number): Promise<Array<{x: number, y: number}>> {
         return this.metricRepository.getSeriesData(name, timestamp);
     }
 }

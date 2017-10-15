@@ -99,7 +99,7 @@ export class MetricRepository implements IMetricRepository {
         return true;
     }
 
-    public async getSeriesData(name: string, timestamp: number): Promise<{ x: number, y: number }[]> {
+    public async getSeriesData(name: string, timestamp: number): Promise<Array<{ x: number, y: number }>> {
 
         if (!this.db) {
             this.db = await mongo.MongoClient.connect(this.uri);
@@ -109,10 +109,10 @@ export class MetricRepository implements IMetricRepository {
 
         const result: any[] = await collection.find({
             name,
-            timestamp: { $gt: timestamp }
+            timestamp: { $gt: timestamp },
         })
             .sort({
-                timestamp: -1
+                timestamp: -1,
             })
             .limit(1800)
             .toArray();

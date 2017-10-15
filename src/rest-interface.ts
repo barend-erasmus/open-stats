@@ -20,7 +20,7 @@ export class RESTInterface {
   constructor(
     private app: any,
     private metricService: MetricService,
-    private tcpAdminInterface: TCPAdminInterface
+    private tcpAdminInterface: TCPAdminInterface,
   ) {
 
     this.app.use(cors());
@@ -48,7 +48,7 @@ export class RESTInterface {
     });
 
     this.app.get("/series", async (req, res) => {
-      const result: { x: number, y: number }[] = await this.metricService.getSeriesData(req.query.name, parseInt(req.query.timestamp));
+      const result: Array<{ x: number, y: number }> = await this.metricService.getSeriesData(req.query.name, parseInt(req.query.timestamp, undefined));
       res.json(result);
     });
 
@@ -81,7 +81,7 @@ export class RESTInterface {
       const result: string[] = await this.metricService.listTimingNames();
       res.json(result);
     });
-    
+
     this.app.get("/chart", async (req, res) => {
       res.render('home');
     });

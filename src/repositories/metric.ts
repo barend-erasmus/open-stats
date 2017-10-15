@@ -20,7 +20,7 @@ export interface IMetricRepository {
 
     saveSeriesData(name: string, value: number, timestamp: number): Promise<boolean>;
 
-    getSeriesData(name: string, timestamp: number): Promise<{x: number, y: number}[]>;
+    getSeriesData(name: string, timestamp: number): Promise<Array<{x: number, y: number}>>;
 
     calculateCounterSum(name: string): Promise<number>;
 
