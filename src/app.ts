@@ -14,13 +14,13 @@ import { MetricService } from "./services/metric";
 
 // imports repositories
 import { MetricRepository as MemoryLiteMetricRepository } from "./repositories//memory-lite/metric";
-import { MetricRepository } from "./repositories//mongo/metric";
+import { MetricRepository } from "./repositories//mongo-lite/metric";
 import { IMetricRepository } from "./repositories/metric";
 
 const argv = yargs.argv;
 
 // const metricRepository: IMetricRepository = new MemoryLiteMetricRepository();
-const metricRepository: IMetricRepository = new MetricRepository('mongodb://localhost:27017/open-stats');
+const metricRepository: IMetricRepository = new MetricRepository('mongodb://localhost:27017/open-stats-001');
 
 const metricService: MetricService = new MetricService(metricRepository);
 
@@ -73,10 +73,15 @@ const jobAggregate = new cron.CronJob('*/10 * * * * *', async () => {
     }
 }, null, true);
 
-const jobClear = new cron.CronJob('0 0 3 * * *', async () => {
+const jobClearStaleData = new cron.CronJob('0 0 3 * * *', async () => {
 
-    await metricRepository.clearStaleData();
+    await metricRepository.clearStaleData(5);
 
 }, null, true);
 
 jobAggregate.start();
+jobClearStaleData.start();
+
+metricRepository.clearStaleData(5).then(() => {
+    console.log('clearStaleData - Done');
+});
