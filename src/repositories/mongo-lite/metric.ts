@@ -90,6 +90,7 @@ export class MetricRepository implements IMetricRepository {
                         count: existingMetric.count + 1,
                         maximum: metric.value > existingMetric.maximum ? metric.value : existingMetric.maximum,
                         minimum: metric.value < existingMetric.minimum ? metric.value : existingMetric.minimum,
+                        name: metric.name,
                         sum: existingMetric.sum + metric.value,
                         sumSquared: existingMetric.sumSquared + Math.pow(metric.value, 2),
                     });
