@@ -272,14 +272,9 @@ export class MetricRepository implements IMetricRepository {
             this.db = await mongo.MongoClient.connect(this.uri);
         }
 
-        const collectionSeries: mongo.Collection = this.db.collection("series");
-        const collectionMetrics: mongo.Collection = this.db.collection("metrics");
+        const collection: mongo.Collection = this.db.collection("series");
 
-        await collectionSeries.remove({
-            timestamp: { $lt: moment().subtract(hours, 'hour').toDate().getTime() },
-        });
-
-        await collectionMetrics.remove({
+        await collection.remove({
             timestamp: { $lt: moment().subtract(hours, 'hour').toDate().getTime() },
         });
 

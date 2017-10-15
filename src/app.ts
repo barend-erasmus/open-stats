@@ -20,7 +20,7 @@ import { IMetricRepository } from "./repositories/metric";
 const argv = yargs.argv;
 
 // const metricRepository: IMetricRepository = new MemoryLiteMetricRepository();
-const metricRepository: IMetricRepository = new MetricRepository('mongodb://localhost:27017/open-stats-001');
+const metricRepository: IMetricRepository = new MetricRepository('mongodb://localhost:27017/open-stats-002');
 
 const metricService: MetricService = new MetricService(metricRepository);
 

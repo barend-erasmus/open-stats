@@ -98,6 +98,7 @@ export class MetricRepository implements IMetricRepository {
                     count: 1,
                     maximum: metric.value,
                     minimum: metric.value,
+                    name: metric.name,
                     sum: metric.value,
                     sumSquared: Math.pow(metric.value, 2),
                 });
