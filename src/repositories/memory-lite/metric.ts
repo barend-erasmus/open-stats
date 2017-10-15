@@ -117,4 +117,8 @@ export class MetricRepository implements IMetricRepository {
 
         return metric ? this.statsService.recalculateStandardDeviation(metric.sum, metric.count, metric.sumSquared) : 0;
     }
+
+    public async clearStaleData(hours: number): Promise<boolean> {
+        return true;
+    }
 }

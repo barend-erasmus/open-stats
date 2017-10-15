@@ -265,4 +265,24 @@ export class MetricRepository implements IMetricRepository {
 
         return result.length === 0 ? 0 : result[0].standardDeviation;
     }
+
+    public async clearStaleData(hours: number): Promise<boolean> {
+
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collectionSeries: mongo.Collection = this.db.collection("series");
+        const collectionMetrics: mongo.Collection = this.db.collection("metrics");
+
+        await collectionSeries.remove({
+            timestamp: { $lt: moment().subtract(hours, 'hour').toDate().getTime() },
+        });
+
+        await collectionMetrics.remove({
+            timestamp: { $lt: moment().subtract(hours, 'hour').toDate().getTime() },
+        });
+
+        return true;
+    }
 }

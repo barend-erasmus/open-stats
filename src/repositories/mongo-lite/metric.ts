@@ -1,4 +1,5 @@
 // imports
+import * as moment from "moment";
 import * as mongo from "mongodb";
 
 // imports interfaces
@@ -143,11 +144,48 @@ export class MetricRepository implements IMetricRepository {
     }
 
     public async saveSeriesData(name: string, value: number, timestamp: number): Promise<boolean> {
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("series");
+
+        const result: any = await collection.insertOne({
+            name,
+            timestamp,
+            value,
+        });
+
         return true;
     }
 
     public async getSeriesData(name: string, timestamp: number): Promise<Array<{ x: number, y: number }>> {
-        return [];
+
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("series");
+
+        const result: any[] = await collection.find({
+            name,
+            timestamp: { $gt: timestamp },
+        })
+            .sort({
+                timestamp: -1,
+            })
+            .limit(1800)
+            .toArray();
+
+        return result.sort((a, b) => {
+            return a.timestamp - b.timestamp;
+        }).map((x) => {
+            return {
+                timestamp: moment(x.timestamp).format('YYYY/MM/DD HH:mm:ss'),
+                x: x.timestamp,
+                y: x.value,
+            };
+        });
     }
 
     public async calculateCounterSum(name: string): Promise<number> {
@@ -220,5 +258,20 @@ export class MetricRepository implements IMetricRepository {
         const metric = await collection.findOne({ name });
 
         return metric ? this.statsService.recalculateStandardDeviation(metric.sum, metric.count, metric.sumSquared) : 0;
+    }
+
+    public async clearStaleData(hours: number): Promise<boolean> {
+
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("series");
+
+        await collection.remove({
+            timestamp: { $lt: moment().subtract(hours, 'hour').toDate().getTime() },
+        });
+
+        return true;
     }
 }
