@@ -35,4 +35,6 @@ export interface IMetricRepository {
     calculateTimingStandardDeviation(name: string): Promise<number>;
 
     clearStaleData(hours: number): Promise<boolean>;
+
+    resetTimingMinimumAndMaximum(name: string): Promise<boolean>;
 }

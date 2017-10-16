@@ -85,8 +85,8 @@ export class MetricRepository implements IMetricRepository {
             if (existingMetric) {
 
                 let count: number = existingMetric.count + 1;
-                const minimum: number = metric.value < existingMetric.minimum ? metric.value : existingMetric.minimum;
-                const maximum: number = metric.value > existingMetric.maximum ? metric.value : existingMetric.maximum;
+                const minimum: number = existingMetric.minimum === null? metric.value : (metric.value < existingMetric.minimum ? metric.value : existingMetric.minimum);
+                const maximum: number = existingMetric.maximum === null? metric.value : metric.value > existingMetric.maximum ? metric.value : existingMetric.maximum;
                 let sum: number = existingMetric.sum + metric.value;
                 let sumSquared: number = existingMetric.sumSquared + Math.pow(metric.value, 2);
 
@@ -286,6 +286,33 @@ export class MetricRepository implements IMetricRepository {
         await collection.remove({
             timestamp: { $lt: moment().subtract(hours, 'hour').toDate().getTime() },
         });
+
+        return true;
+    }
+
+    public async resetTimingMinimumAndMaximum(name: string): Promise<boolean> {
+        if (!this.db) {
+            this.db = await mongo.MongoClient.connect(this.uri);
+        }
+
+        const collection: mongo.Collection = this.db.collection("timings");
+
+        const existingMetric = await collection.findOne({ name });
+
+        if (existingMetric) {
+
+            await collection.updateOne({
+                name,
+            },
+                {
+                    count: existingMetric.count,
+                    maximum: null,
+                    minimum: null,
+                    name,
+                    sum: existingMetric.sum,
+                    sumSquared: existingMetric.sumSquared,
+                });
+        }
 
         return true;
     }

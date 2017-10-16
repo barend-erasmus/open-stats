@@ -85,4 +85,36 @@ export class MetricService {
     public async getSeriesData(name: string, timestamp: number): Promise<Array<{x: number, y: number}>> {
         return this.metricRepository.getSeriesData(name, timestamp);
     }
+
+    public async saveSeriesData(): Promise<boolean> {
+        const counterNames: string[] = await this.listCounterNames();
+        const gaugeNames: string[] = await this.listGaugeNames();
+        const timingNames: string[] = await this.listTimingNames();
+    
+        for (const name of counterNames) {
+            const counter = await this.getCounter(name);
+    
+            await this.metricRepository.saveSeriesData(name, counter.value, new Date().getTime());
+        }
+    
+        for (const name of gaugeNames) {
+            const gauge = await this.getGauge(name);
+    
+            await this.metricRepository.saveSeriesData(name, gauge.value, new Date().getTime());
+        }
+    
+        for (const name of timingNames) {
+            const timing = await this.getTiming(name);
+            const timestamp: number = new Date().getTime();
+    
+            await this.metricRepository.saveSeriesData(`${name}.minimum`, timing.minimum, timestamp);
+            await this.metricRepository.saveSeriesData(`${name}.maximum`, timing.maximum, timestamp);
+            await this.metricRepository.saveSeriesData(`${name}.mean`, timing.mean, timestamp);
+            await this.metricRepository.saveSeriesData(`${name}.stdDev`, timing.standardDeviation, timestamp);
+
+            await this.metricRepository.resetTimingMinimumAndMaximum(name);
+        }
+
+        return true;
+    }
 }

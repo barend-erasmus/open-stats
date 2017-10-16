@@ -121,4 +121,8 @@ export class MetricRepository implements IMetricRepository {
     public async clearStaleData(hours: number): Promise<boolean> {
         return true;
     }
+
+    public async resetTimingMinimumAndMaximum(name: string): Promise<boolean> {
+        return true;
+    }
 }

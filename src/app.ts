@@ -46,31 +46,7 @@ httpServer.listen(argv.port || 3000);
 
 const jobAggregate = new cron.CronJob('0 */1 * * * *', async () => {
 
-    const counterNames: string[] = await metricService.listCounterNames();
-    const gaugeNames: string[] = await metricService.listGaugeNames();
-    const timingNames: string[] = await metricService.listTimingNames();
-
-    for (const name of counterNames) {
-        const counter = await metricService.getCounter(name);
-
-        await metricRepository.saveSeriesData(name, counter.value, new Date().getTime());
-    }
-
-    for (const name of gaugeNames) {
-        const gauge = await metricService.getGauge(name);
-
-        await metricRepository.saveSeriesData(name, gauge.value, new Date().getTime());
-    }
-
-    for (const name of timingNames) {
-        const timing = await metricService.getTiming(name);
-        const timestamp: number = new Date().getTime();
-
-        await metricRepository.saveSeriesData(`${name}.minimum`, timing.minimum, timestamp);
-        await metricRepository.saveSeriesData(`${name}.maximum`, timing.maximum, timestamp);
-        await metricRepository.saveSeriesData(`${name}.mean`, timing.mean, timestamp);
-        await metricRepository.saveSeriesData(`${name}.stdDev`, timing.standardDeviation, timestamp);
-    }
+    await metricService.saveSeriesData();
 
 }, null, true);
 

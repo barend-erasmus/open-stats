@@ -15,7 +15,7 @@ export class MetricRepository implements IMetricRepository {
 
     private db: mongo.Db;
 
-    constructor(private uri: string) {
+    constructor(private uri: string, private intervalInSeconds: number) {
 
     }
 
@@ -203,7 +203,13 @@ export class MetricRepository implements IMetricRepository {
 
         const result: any[] = await collection.aggregate([
             {
-                $match: { name, type: "timing" },
+                $match: {
+                    name,
+                    type: "timing",
+                    timestamp: {
+                        $gt: new Date().getTime() - (this.intervalInSeconds * 1000)
+                    }
+                },
             },
             {
                 $group: {
@@ -275,6 +281,10 @@ export class MetricRepository implements IMetricRepository {
             timestamp: { $lt: moment().subtract(hours, 'hour').toDate().getTime() },
         });
 
+        return true;
+    }
+
+    public async resetTimingMinimumAndMaximum(name: string): Promise<boolean> {
         return true;
     }
 }
