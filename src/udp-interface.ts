@@ -1,13 +1,8 @@
 // imports
 import * as dgram from "dgram";
 
-import { TCPAdminInterface } from "./tcp-admin-interface";
-
 // imports services
 import { MetricService } from "./services/metric";
-
-// imports models
-import { Data } from "./metric-types/data";
 
 export class UDPInterface {
 
@@ -17,7 +12,6 @@ export class UDPInterface {
         private host: string,
         private port: number,
         private metricService: MetricService,
-        private tcpAdminInterface: TCPAdminInterface,
     ) {
 
         this.server = dgram.createSocket("udp4");
@@ -51,18 +45,7 @@ export class UDPInterface {
                     break;
             }
 
-            const data: Data = new Data(
-                type,
-                name,
-                type === "gauge" && (value.startsWith("+") || value.startsWith("-")) ? null : parseFloat(value),
-                type === "gauge" && (value.startsWith("+") || value.startsWith("-")) ? parseFloat(value) : null,
-                null,
-                new Date().getTime(),
-            );
-
-            await this.metricService.log(data);
-
-            await this.tcpAdminInterface.sendUpdateToAllSockets(data);
+            await this.metricService.log(type, name, parseFloat(value));
         }
     }
 }

@@ -1,6 +1,5 @@
+import * as express from 'express';
 import * as path from 'path';
-
-import { TCPAdminInterface } from "./tcp-admin-interface";
 
 import * as bodyParser from "body-parser";
 import * as cors from "cors";
@@ -10,7 +9,6 @@ import * as exphbs from 'express-handlebars';
 import { MetricService } from "./services/metric";
 
 // imports models
-import { Data } from "./metric-types/data";
 import { Counter } from "./models/counter";
 import { Gauge } from "./models/gauge";
 import { Timing } from "./models/timing";
@@ -20,7 +18,6 @@ export class RESTInterface {
   constructor(
     private app: any,
     private metricService: MetricService,
-    private tcpAdminInterface: TCPAdminInterface,
   ) {
 
     this.app.use(cors());
@@ -39,46 +36,22 @@ export class RESTInterface {
   }
 
   private initialize(): void {
+    this.app.use('/coverage', express.static(path.join(__dirname, './../coverage/lcov-report')));
+
     this.app.post("/log", async (req, res) => {
-      const data: Data = req.body;
-      await this.metricService.log(data);
-      await this.tcpAdminInterface.sendUpdateToAllSockets(data);
+      const data: any = req.body;
+      await this.metricService.log(data.type, data.name, data.value);
 
       res.send("OK");
     });
 
+    this.app.get("/names", async (req, res) => {
+      const result: string[] = await this.metricService.listNames();
+      res.json(result);
+    });
+
     this.app.get("/series", async (req, res) => {
-      const result: Array<{ x: number, y: number }> = await this.metricService.getSeriesData(req.query.name, parseInt(req.query.timestamp, undefined));
-      res.json(result);
-    });
-
-    this.app.get("/counter", async (req, res) => {
-      const result: Counter = await this.metricService.getCounter(req.query.name);
-      res.json(result);
-    });
-
-    this.app.get("/counters", async (req, res) => {
-      const result: string[] = await this.metricService.listCounterNames();
-      res.json(result);
-    });
-
-    this.app.get("/gauge", async (req, res) => {
-      const result: Gauge = await this.metricService.getGauge(req.query.name);
-      res.json(result);
-    });
-
-    this.app.get("/gauges", async (req, res) => {
-      const result: string[] = await this.metricService.listGaugeNames();
-      res.json(result);
-    });
-
-    this.app.get("/timing", async (req, res) => {
-      const result: Timing = await this.metricService.getTiming(req.query.name);
-      res.json(result);
-    });
-
-    this.app.get("/timings", async (req, res) => {
-      const result: string[] = await this.metricService.listTimingNames();
+      const result: Array<{ timestamp: string, x: number, y: number }> = await this.metricService.getData(req.query.name, parseInt(req.query.timestamp, undefined));
       res.json(result);
     });
 

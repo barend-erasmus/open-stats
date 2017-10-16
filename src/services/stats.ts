@@ -1,6 +1,10 @@
 export class StatsService {
 
     public calculateMean(data: number[]): number {
+        if (data.length === 0) {
+            return 0;
+        }
+
         let total: number = 0;
 
         for (let i: number = 0; i < data.length; i += 1) {
@@ -10,7 +14,13 @@ export class StatsService {
     }
 
     public calculateMedian(data: number[]): number {
-        data.sort();
+        if (data.length === 0) {
+            return 0;
+        }
+
+        data = data.sort((a: number, b: number) => {
+            return a - b;
+        });
 
         if (data.length % 2 === 0) {
             return (data[data.length / 2 - 1] + data[data.length / 2]) / 2;
@@ -21,17 +31,27 @@ export class StatsService {
     }
 
     public calculateMinimum(data: number[]): number {
-        data.sort();
+        if (data.length === 0) {
+            return 0;
+        }
+
+        data = data.sort((a: number, b: number) => {
+            return a - b;
+        });
 
         return data[0];
-
     }
 
     public calculateMaximum(data: number[]): number {
-        data.sort();
+        if (data.length === 0) {
+            return 0;
+        }
+
+        data = data.sort((a: number, b: number) => {
+            return a - b;
+        });
 
         return data[data.length - 1];
-
     }
 
     public calculateSum(data: number[]): number {
@@ -45,6 +65,10 @@ export class StatsService {
     }
 
     public calculateStandardDeviation(data: number[]): number {
+        if (data.length === 0) {
+            return 0;
+        }
+
         const mean: number = this.calculateMean(data);
 
         const a: number[] = data.map((x) => Math.pow(x - mean, 2));

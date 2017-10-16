@@ -1,0 +1,231 @@
+import { expect } from "chai";
+import "mocha";
+
+import { MetricService } from "./metric";
+
+import { Aggregate } from './../models/aggregate';
+
+describe("MetricService", () => {
+    describe("log - Counter", () => {
+        it("should return value given single log value", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('counter', 'simple.counter', 5);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.counters[0].value).to.be.eq(5);
+        });
+
+        it("should return rate given single log value", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('counter', 'simple.counter', 5);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.counters[0].rate).to.be.eq(0.5);
+        });
+
+        it("should return value given multiple log values", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('counter', 'simple.counter', 5);
+            metricService.log('counter', 'simple.counter', -2);
+            metricService.log('counter', 'simple.counter', 10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.counters[0].value).to.be.eq(13);
+        });
+
+        it("should return rate given multiple log values", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('counter', 'simple.counter', 5);
+            metricService.log('counter', 'simple.counter', -2);
+            metricService.log('counter', 'simple.counter', 10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.counters[0].rate).to.be.eq(1.3);
+        });
+
+        it("should set counter to 0 when aggregate is called", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('counter', 'simple.counter', 5);
+
+            metricService.aggerate(10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.counters[0].value).to.be.eq(0);
+            expect(aggregate.counters[0].rate).to.be.eq(0);
+        });
+    });
+
+    describe("log - Gauge", () => {
+        it("should return value given single log value", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('gauge', 'simple.gauge', 5);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.gauges[0].value).to.be.eq(5);
+        });
+
+        it("should return value given multiple log values", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('gauge', 'simple.gauge', 5);
+            metricService.log('gauge', 'simple.gauge', -2);
+            metricService.log('gauge', 'simple.gauge', 10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.gauges[0].value).to.be.eq(10);
+        });
+
+        it("should not clear gauge when aggregate is called", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('gauge', 'simple.gauge', 5);
+
+            metricService.aggerate(10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.gauges[0].value).to.be.eq(5);
+        });
+    });
+
+    describe("log - Timing", () => {
+        it("should return mimimum given single log value", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].minimum).to.be.eq(5);
+        });
+
+        it("should return minimum given multiple log values", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+            metricService.log('timing', 'simple.timing', -2);
+            metricService.log('timing', 'simple.timing', 10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].minimum).to.be.eq(-2);
+        });
+
+        it("should return maximum given single log value", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].maximum).to.be.eq(5);
+        });
+
+        it("should return maximum given multiple log values", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+            metricService.log('timing', 'simple.timing', -2);
+            metricService.log('timing', 'simple.timing', 10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].maximum).to.be.eq(10);
+        });
+
+        it("should return mean given single log value", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].mean).to.be.eq(5);
+        });
+
+        it("should return mean given multiple log values", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+            metricService.log('timing', 'simple.timing', -2);
+            metricService.log('timing', 'simple.timing', 10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].mean).to.be.eq(4.333333333333333);
+        });
+
+        it("should return median given single log value", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].median).to.be.eq(5);
+        });
+
+        it("should return median given multiple log values", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+            metricService.log('timing', 'simple.timing', -2);
+            metricService.log('timing', 'simple.timing', 10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].median).to.be.eq(5);
+        });
+
+        it("should return standard deviation given single log value", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].standardDeviation).to.be.eq(0);
+        });
+
+        it("should return standard deviation given multiple log values", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+            metricService.log('timing', 'simple.timing', -2);
+            metricService.log('timing', 'simple.timing', 10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].standardDeviation).to.be.eq(4.9216076867444665);
+        });
+
+        it("should set timing to empty when aggregate is called", () => {
+            const metricService: MetricService = new MetricService(null);
+
+            metricService.log('timing', 'simple.timing', 5);
+
+            metricService.aggerate(10);
+
+            const aggregate: Aggregate = metricService.aggerate(10);
+
+            expect(aggregate.timings[0].maximum).to.be.eq(0);
+            expect(aggregate.timings[0].minimum).to.be.eq(0);
+            expect(aggregate.timings[0].mean).to.be.eq(0);
+            expect(aggregate.timings[0].median).to.be.eq(0);
+            expect(aggregate.timings[0].standardDeviation).to.be.eq(0);
+        });
+    });
+});
