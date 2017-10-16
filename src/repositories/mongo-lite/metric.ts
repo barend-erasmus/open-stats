@@ -83,16 +83,32 @@ export class MetricRepository implements IMetricRepository {
             const existingMetric = await collection.findOne({ name: metric.name });
 
             if (existingMetric) {
+
+                let count: number = existingMetric.count + 1;
+                const minimum: number = metric.value < existingMetric.minimum ? metric.value : existingMetric.minimum;
+                const maximum: number = metric.value > existingMetric.maximum ? metric.value : existingMetric.maximum;
+                let sum: number = existingMetric.sum + metric.value;
+                let sumSquared: number = existingMetric.sumSquared + Math.pow(metric.value, 2);
+
+                const canScaleDownValues: boolean = count % 5 === 0;
+                const shouldScaleDownValues: boolean = sum > Math.pow(2, 30) || sumSquared > Math.pow(2, 30);
+
+                if (canScaleDownValues && shouldScaleDownValues) {
+                    count /= 5;
+                    sum /= 5;
+                    sumSquared /= 5;
+                }
+
                 await collection.updateOne({
                     name: metric.name,
                 },
                     {
-                        count: existingMetric.count + 1,
-                        maximum: metric.value > existingMetric.maximum ? metric.value : existingMetric.maximum,
-                        minimum: metric.value < existingMetric.minimum ? metric.value : existingMetric.minimum,
+                        count: count,
+                        maximum: maximum,
+                        minimum: minimum,
                         name: metric.name,
-                        sum: existingMetric.sum + metric.value,
-                        sumSquared: existingMetric.sumSquared + Math.pow(metric.value, 2),
+                        sum: sum,
+                        sumSquared: sumSquared,
                     });
             } else {
                 await collection.insertOne({
