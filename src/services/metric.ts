@@ -18,7 +18,7 @@ export class MetricService {
     private gauges: {} = {};
     private timings: {} = {};
 
-    constructor(private seriesRepository: ISeriesRepository) {
+    constructor(private seriesRepository: ISeriesRepository, private onLog: (type: string, name: string, value: number) => void) {
 
     }
 
@@ -35,6 +35,9 @@ export class MetricService {
                 break;
 
         }
+        this.updateCounter('open-stats.metrics', 1);
+
+        this.onLog(type, name, value);
     }
 
     public async sendAggerate(intervalInSeconds: number): Promise<void> {
@@ -43,18 +46,13 @@ export class MetricService {
 
         const aggregate: Aggregate = this.aggerate(intervalInSeconds);
 
-        let count: number = 0;
-
         for (const counter of aggregate.counters) {
             await this.seriesRepository.saveData(counter.name, counter.value, timestamp);
             await this.seriesRepository.saveData(`${counter.name}.rate`, counter.value / intervalInSeconds, timestamp);
-
-            count++;
         }
 
         for (const gauge of aggregate.gauges) {
             await this.seriesRepository.saveData(gauge.name, gauge.value, timestamp);
-            count++;
         }
 
         for (const timing of aggregate.timings) {
@@ -63,12 +61,7 @@ export class MetricService {
             await this.seriesRepository.saveData(`${timing.name}.median`, timing.median, timestamp);
             await this.seriesRepository.saveData(`${timing.name}.minimum`, timing.minimum, timestamp);
             await this.seriesRepository.saveData(`${timing.name}.standardDeviation`, timing.standardDeviation, timestamp);
-
-            count++;
         }
-
-        await this.seriesRepository.saveData('open-stats.metrics', count, timestamp);
-        await this.seriesRepository.saveData(`open-stats.metrics.rate`, count / intervalInSeconds, timestamp);
     }
 
     public aggerate(intervalInSeconds: number): Aggregate {

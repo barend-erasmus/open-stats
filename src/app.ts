@@ -41,7 +41,9 @@ const seriesRepository: ISeriesRepository = new MetricRepository('mongodb://loca
     tcpAdminInterface.sendUpdateToAllSockets(name, value);
 });
 
-const metricService: MetricService = new MetricService(seriesRepository);
+const metricService: MetricService = new MetricService(seriesRepository, (type: string, name: string, value: number) => {
+    tcpAdminInterface.sendUpdateToAllSockets(name, value);
+});
 
 // Web Socket Interface
 const websocketInterface: WebSocketInterface = new WebSocketInterface(httpServer, metricService);

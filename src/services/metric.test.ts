@@ -8,7 +8,7 @@ import { Aggregate } from './../models/aggregate';
 describe("MetricService", () => {
     describe("log - Counter", () => {
         it("should return value given single log value", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('counter', 'simple.counter', 5);
 
@@ -18,7 +18,7 @@ describe("MetricService", () => {
         });
 
         it("should return rate given single log value", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('counter', 'simple.counter', 5);
 
@@ -28,7 +28,7 @@ describe("MetricService", () => {
         });
 
         it("should return value given multiple log values", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('counter', 'simple.counter', 5);
             metricService.log('counter', 'simple.counter', -2);
@@ -40,7 +40,7 @@ describe("MetricService", () => {
         });
 
         it("should return rate given multiple log values", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('counter', 'simple.counter', 5);
             metricService.log('counter', 'simple.counter', -2);
@@ -52,7 +52,7 @@ describe("MetricService", () => {
         });
 
         it("should set counter to 0 when aggregate is called", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('counter', 'simple.counter', 5);
 
@@ -67,7 +67,7 @@ describe("MetricService", () => {
 
     describe("log - Gauge", () => {
         it("should return value given single log value", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('gauge', 'simple.gauge', 5);
 
@@ -77,7 +77,7 @@ describe("MetricService", () => {
         });
 
         it("should return value given multiple log values", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('gauge', 'simple.gauge', 5);
             metricService.log('gauge', 'simple.gauge', -2);
@@ -89,7 +89,7 @@ describe("MetricService", () => {
         });
 
         it("should not clear gauge when aggregate is called", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('gauge', 'simple.gauge', 5);
 
@@ -103,7 +103,7 @@ describe("MetricService", () => {
 
     describe("log - Timing", () => {
         it("should return mimimum given single log value", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
 
@@ -113,7 +113,7 @@ describe("MetricService", () => {
         });
 
         it("should return minimum given multiple log values", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
             metricService.log('timing', 'simple.timing', -2);
@@ -125,7 +125,7 @@ describe("MetricService", () => {
         });
 
         it("should return maximum given single log value", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
 
@@ -135,7 +135,7 @@ describe("MetricService", () => {
         });
 
         it("should return maximum given multiple log values", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
             metricService.log('timing', 'simple.timing', -2);
@@ -147,7 +147,7 @@ describe("MetricService", () => {
         });
 
         it("should return mean given single log value", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
 
@@ -157,7 +157,7 @@ describe("MetricService", () => {
         });
 
         it("should return mean given multiple log values", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
             metricService.log('timing', 'simple.timing', -2);
@@ -169,7 +169,7 @@ describe("MetricService", () => {
         });
 
         it("should return median given single log value", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
 
@@ -179,7 +179,7 @@ describe("MetricService", () => {
         });
 
         it("should return median given multiple log values", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
             metricService.log('timing', 'simple.timing', -2);
@@ -191,7 +191,7 @@ describe("MetricService", () => {
         });
 
         it("should return standard deviation given single log value", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
 
@@ -201,7 +201,7 @@ describe("MetricService", () => {
         });
 
         it("should return standard deviation given multiple log values", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
             metricService.log('timing', 'simple.timing', -2);
@@ -213,7 +213,7 @@ describe("MetricService", () => {
         });
 
         it("should set timing to empty when aggregate is called", () => {
-            const metricService: MetricService = new MetricService(null);
+            const metricService: MetricService = new MetricService(null, () => {});
 
             metricService.log('timing', 'simple.timing', 5);
 
