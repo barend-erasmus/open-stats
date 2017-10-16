@@ -112,14 +112,11 @@ export class MetricRepository implements IMetricRepository {
             timestamp: { $gt: timestamp },
         })
             .sort({
-                timestamp: -1,
+                timestamp: 1,
             })
-            .limit(1800)
             .toArray();
 
-        return result.sort((a, b) => {
-            return a.timestamp - b.timestamp;
-        }).map((x) => {
+        return result.map((x) => {
             return {
                 timestamp: moment(x.timestamp).format('YYYY/MM/DD HH:mm:ss'),
                 x: x.timestamp,

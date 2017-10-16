@@ -44,7 +44,7 @@ const restInterface: RESTInterface = new RESTInterface(app, metricService, tcpAd
 
 httpServer.listen(argv.port || 3000);
 
-const jobAggregate = new cron.CronJob('*/10 * * * * *', async () => {
+const jobAggregate = new cron.CronJob('0 */1 * * * *', async () => {
 
     const counterNames: string[] = await metricService.listCounterNames();
     const gaugeNames: string[] = await metricService.listGaugeNames();
@@ -71,9 +71,10 @@ const jobAggregate = new cron.CronJob('*/10 * * * * *', async () => {
         await metricRepository.saveSeriesData(`${name}.mean`, timing.mean, timestamp);
         await metricRepository.saveSeriesData(`${name}.stdDev`, timing.standardDeviation, timestamp);
     }
+
 }, null, true);
 
-const jobClearStaleData = new cron.CronJob('0 0 3 * * *', async () => {
+const jobClearStaleData = new cron.CronJob('0 0 */3 * * *', async () => {
 
     await metricRepository.clearStaleData(5);
 
