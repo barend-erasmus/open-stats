@@ -23,6 +23,10 @@ export class UDPInterface {
         this.server.bind(this.port, this.host);
     }
 
+    public async _onMessage(dataBuffer: Buffer, remote: any): Promise<void> {
+        return this.onMessage(dataBuffer, remote);
+    }
+
     private async onMessage(dataBuffer: Buffer, remote: any): Promise<void> {
         const messages: string[] = dataBuffer.toString().split(/\n/g);
 
