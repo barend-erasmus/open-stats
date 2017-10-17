@@ -1,5 +1,6 @@
 <div class="row" id="chart-list">
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 <script>
     var colors = ['#05A8AA', '#B8D5B8', '#D7B49E', '#DC602E', '#BC412B'];
@@ -37,11 +38,15 @@
             }
 
             data.forEach((x) => {
-                charts[name].data.labels.push(x.timestamp);
-                charts[name].data.datasets[0].data.push(x.y);
+                charts[name].data.datasets[0].data.push({
+                    x: new Date(x.x),
+                    y: x.y,
+                });
 
-                charts[name].data.labels.splice(0, 1);
-                charts[name].data.datasets[0].data.splice(0, 1);
+                if (charts[name].data.datasets[0].data.length >= 300) {
+                    charts[name].data.datasets[0].data.splice(0, 1);
+                }
+
             });
 
             charts[name].update(0);
@@ -57,10 +62,14 @@
         charts[name] = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.map((x) => x.timestamp),
                 datasets: [{
                     label: name,
-                    data: data.map((x) => x.y),
+                    data: data.map((x) => {
+                        return {
+                            x: new Date(x.x),
+                            y: x.y,
+                        };
+                    }),
                     backgroundColor: 'transparent',
                     borderColor: colors[3],
                 }]
@@ -73,9 +82,20 @@
                 },
                 scales: {
                     xAxes: [{
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: 20
+                        type: 'time',
+                        autoSkip: true,
+                        maxTicksLimit: 20,
+                        time: {
+                            tooltipFormat: 'HH:mm:ss',
+                            displayFormats: {
+                                'millisecond': 'YYYY/MM/DD HH:mm:ss',
+                                'second': 'YYYY/MM/DD HH:mm:ss',
+                                'minute': 'YYYY/MM/DD HH:mm',
+                                'hour': 'YYYY/MM/DD HH:00',
+                                'day': 'YYYY/MM/DD',
+                                'month': 'YYYY/MM',
+                                'year': 'YYYY/',
+                            }
                         }
                     }]
                 }

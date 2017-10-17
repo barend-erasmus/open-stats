@@ -74,6 +74,8 @@ export class MetricService {
             this.counters[name] = 0;
         }
 
+        this.counters = {};
+
         const aggregateGauges: Gauge[] = [];
 
         for (const name in this.gauges) {
@@ -94,6 +96,8 @@ export class MetricService {
 
             this.timings[name] = [];
         }
+
+        this.timings = {};
 
         return new Aggregate(aggregateCounters, aggregateGauges, aggregateTimings);
     }
