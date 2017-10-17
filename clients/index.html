@@ -23,13 +23,12 @@
     window.onbeforeunload = function (event) {
         if (window.location.protocol === 'http:' || true) {
             xmlhttp = new XMLHttpRequest();
-            xmlhttp.open("POST", "http://open-stats.openservices.co.za/log", false);
+            xmlhttp.open("POST", "http://open-stats.openservices.co.za/api/metrics/log", false);
             xmlhttp.setRequestHeader("Content-type", "application/json");
             xmlhttp.send(JSON.stringify({
                 type: 'timing',
                 name: `Browser.${window.location.pathname.toLowerCase().replace(/[:.]/g, '').replace(/\//g, '_')}`,
-                value: TimeMe.getTimeOnCurrentPageInSeconds(),
-                timestamp: new Date().getTime()
+                value: TimeMe.getTimeOnCurrentPageInSeconds()
             }));
         }
     };

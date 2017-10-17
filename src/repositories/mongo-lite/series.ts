@@ -11,11 +11,11 @@ export class MetricRepository implements ISeriesRepository {
 
     private db: mongo.Db;
 
-    constructor(private uri: string, private onSaveData: (name: string, value: number) => void) {
+    constructor(private uri: string, private onSaveData: (name: string, value: number, tags: {}) => void) {
 
     }
 
-    public async saveData(name: string, value: number, timestamp: number, token: string): Promise<boolean> {
+    public async saveData(name: string, value: number, timestamp: number, token: string, tags: {}): Promise<boolean> {
         if (!this.db) {
             this.db = await mongo.MongoClient.connect(this.uri);
         }
@@ -24,12 +24,13 @@ export class MetricRepository implements ISeriesRepository {
 
         const result: any = await collection.insertOne({
             name,
+            tags: tags || {},
             timestamp,
             token,
             value,
         });
 
-        this.onSaveData(name, value);
+        this.onSaveData(name, value, tags);
 
         return true;
     }
@@ -48,7 +49,7 @@ export class MetricRepository implements ISeriesRepository {
         return result;
     }
 
-    public async getData(name: string, timestamp: number, token: string): Promise<Array<{ timestamp: string, x: number, y: number }>> {
+    public async getData(name: string, timestamp: number, token: string, tags: {}): Promise<Array<{ timestamp: string, x: number, y: number }>> {
 
         if (!this.db) {
             this.db = await mongo.MongoClient.connect(this.uri);
@@ -58,6 +59,7 @@ export class MetricRepository implements ISeriesRepository {
 
         const result: any[] = await collection.find({
             name,
+            tags: tags || {},
             timestamp: { $gt: timestamp },
             token,
         })

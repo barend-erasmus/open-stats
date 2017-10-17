@@ -38,25 +38,25 @@ export class RESTInterface {
   private initialize(): void {
     this.app.use('/coverage', express.static(path.join(__dirname, './../coverage/lcov-report')));
 
-    this.app.post("/log", async (req, res) => {
+    this.app.post("/api/metrics/log", async (req, res) => {
       const data: any = req.body;
-      await this.metricService.log(data.type, data.name, data.value, data.token);
+      await this.metricService.log(data.type, data.name, data.value, data.token, data.tags);
 
       res.send("OK");
     });
 
-    this.app.get("/names", async (req, res) => {
+    this.app.get("/api/metrics/names", async (req, res) => {
       const result: string[] = await this.metricService.listNames(req.query.token);
       res.json(result);
     });
 
-    this.app.get("/series", async (req, res) => {
-      const result: Array<{ timestamp: string, x: number, y: number }> = await this.metricService.getData(req.query.name, parseInt(req.query.timestamp, undefined), req.query.token);
+    this.app.post("/api/metrics/series", async (req, res) => {
+      const result: Array<{ timestamp: string, x: number, y: number }> = await this.metricService.getData(req.body.name, parseInt(req.body.timestamp, undefined), req.body.token, req.body.tags);
       res.json(result);
     });
 
-    this.app.get("/chart", async (req, res) => {
-      res.render('home');
+    this.app.get("/api/metrics/chart", async (req, res) => {
+      res.render('api/metrics/chart');
     });
   }
 }

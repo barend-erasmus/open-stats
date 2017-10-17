@@ -18,11 +18,11 @@ export class MetricService {
     private gauges: {} = {};
     private timings: {} = {};
 
-    constructor(private seriesRepository: ISeriesRepository, private onLog: (type: string, name: string, value: number) => void) {
+    constructor(private seriesRepository: ISeriesRepository, private onLog: (type: string, name: string, value: number, tags: {}) => void) {
 
     }
 
-    public log(type: string, name: string, value: number, token: string): void {
+    public async log(type: string, name: string, value: number, token: string, tags: {}): Promise<void> {
         switch (type) {
             case 'counter':
                 this.updateCounter(name, value, token || 'default');
@@ -33,11 +33,14 @@ export class MetricService {
             case 'timing':
                 this.updateTiming(name, value, token || 'default');
                 break;
+            case 'series':
+                await this.seriesRepository.saveData(name, value, new Date().getTime(), token || 'default', tags);
+                break;
         }
 
         this.updateCounter('open-stats.metrics', 1, token || 'default');
 
-        this.onLog(type, name, value);
+        this.onLog(type, name, value, tags);
     }
 
     public async sendAggerate(intervalInSeconds: number): Promise<void> {
@@ -47,20 +50,20 @@ export class MetricService {
         const aggregate: Aggregate = this.aggerate(intervalInSeconds);
 
         for (const counter of aggregate.counters) {
-            await this.seriesRepository.saveData(counter.name, counter.value, timestamp, counter.token);
-            await this.seriesRepository.saveData(`${counter.name}.rate`, counter.value / intervalInSeconds, timestamp, counter.token);
+            await this.seriesRepository.saveData(counter.name, counter.value, timestamp, counter.token, {});
+            await this.seriesRepository.saveData(`${counter.name}.rate`, counter.value / intervalInSeconds, timestamp, counter.token, {});
         }
 
         for (const gauge of aggregate.gauges) {
-            await this.seriesRepository.saveData(gauge.name, gauge.value, timestamp, gauge.token);
+            await this.seriesRepository.saveData(gauge.name, gauge.value, timestamp, gauge.token, {});
         }
 
         for (const timing of aggregate.timings) {
-            await this.seriesRepository.saveData(`${timing.name}.maximum`, timing.maximum, timestamp, timing.token);
-            await this.seriesRepository.saveData(`${timing.name}.mean`, timing.mean, timestamp, timing.token);
-            await this.seriesRepository.saveData(`${timing.name}.median`, timing.median, timestamp, timing.token);
-            await this.seriesRepository.saveData(`${timing.name}.minimum`, timing.minimum, timestamp, timing.token);
-            await this.seriesRepository.saveData(`${timing.name}.standardDeviation`, timing.standardDeviation, timestamp, timing.token);
+            await this.seriesRepository.saveData(`${timing.name}.maximum`, timing.maximum, timestamp, timing.token, {});
+            await this.seriesRepository.saveData(`${timing.name}.mean`, timing.mean, timestamp, timing.token, {});
+            await this.seriesRepository.saveData(`${timing.name}.median`, timing.median, timestamp, timing.token, {});
+            await this.seriesRepository.saveData(`${timing.name}.minimum`, timing.minimum, timestamp, timing.token, {});
+            await this.seriesRepository.saveData(`${timing.name}.standardDeviation`, timing.standardDeviation, timestamp, timing.token, {});
         }
     }
 
@@ -102,8 +105,8 @@ export class MetricService {
         return new Aggregate(aggregateCounters, aggregateGauges, aggregateTimings);
     }
 
-    public async getData(name: string, timestamp: number, token: string): Promise<Array<{ timestamp: string, x: number, y: number }>> {
-        return this.seriesRepository.getData(name, timestamp, token || 'default');
+    public async getData(name: string, timestamp: number, token: string, tags: {}): Promise<Array<{ timestamp: string, x: number, y: number }>> {
+        return this.seriesRepository.getData(name, timestamp, token || 'default', tags);
     }
 
     public async listNames(token: string): Promise<string[]> {

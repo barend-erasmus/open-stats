@@ -39,7 +39,7 @@ export class UDPInterface {
 
             const tags: {} = {};
 
-            const rawTags: string[] = splittedMessage[2]? splittedMessage[2].substring(1).split(',') : [];
+            const rawTags: string[] = splittedMessage[2] ? splittedMessage[2].substring(1).split(',') : [];
 
             for (const item of rawTags) {
                 tags[item.split(':')[0]] = item.split(':')[1];
@@ -57,9 +57,12 @@ export class UDPInterface {
                 case "ms":
                     type = "timing";
                     break;
+                case "s":
+                    type = "series";
+                    break;
             }
 
-            await this.metricService.log(type, name, parseFloat(value), tags['token']);
+            await this.metricService.log(type, name, parseFloat(value), tags['token'], tags);
         }
     }
 }

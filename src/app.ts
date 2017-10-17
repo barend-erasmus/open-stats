@@ -39,6 +39,7 @@ tcpAdminInterface.start();
 
 const seriesRepository: ISeriesRepository = new MetricRepository('mongodb://localhost:27017/open-stats-006', (name: string, value: number) => {
     // tcpAdminInterface.sendUpdateToAllSockets(name, value);
+    console.log(`${name}: ${value}`);
 });
 
 const metricService: MetricService = new MetricService(seriesRepository, (type: string, name: string, value: number) => {

@@ -17,7 +17,11 @@
     }
 
     function initialize(name) {
-        $.get(`/series?name=${name}&timestamp=0&token=${token}`, function (data) {
+        $.post(`/api/metrics/series`, {
+            name,
+            token,
+            timestamp: 0
+        }, function (data) {
             initializeChart(name, data);
 
             if (data.length === 0) {
@@ -33,7 +37,11 @@
     }
 
     function updateChart(name) {
-        $.get(`/series?name=${name}&timestamp=${lastTimestamps[name]}&token=${token}`, function (data) {
+        $.post(`/api/metrics/series`, {
+            name,
+            token,
+            timestamp: lastTimestamps[name]
+        }, function (data) {
 
             if (data.length === 0) {
                 return;
