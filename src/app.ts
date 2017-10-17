@@ -37,7 +37,7 @@ const httpServer = http.createServer(app);
 const tcpAdminInterface: TCPAdminInterface = new TCPAdminInterface("0.0.0.0", 8126);
 tcpAdminInterface.start();
 
-const seriesRepository: ISeriesRepository = new MetricRepository('mongodb://localhost:27017/open-stats-005', (name: string, value: number) => {
+const seriesRepository: ISeriesRepository = new MetricRepository('mongodb://localhost:27017/open-stats-006', (name: string, value: number) => {
     // tcpAdminInterface.sendUpdateToAllSockets(name, value);
 });
 

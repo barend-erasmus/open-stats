@@ -40,18 +40,18 @@ export class RESTInterface {
 
     this.app.post("/log", async (req, res) => {
       const data: any = req.body;
-      await this.metricService.log(data.type, data.name, data.value);
+      await this.metricService.log(data.type, data.name, data.value, data.token);
 
       res.send("OK");
     });
 
     this.app.get("/names", async (req, res) => {
-      const result: string[] = await this.metricService.listNames();
+      const result: string[] = await this.metricService.listNames(req.query.token);
       res.json(result);
     });
 
     this.app.get("/series", async (req, res) => {
-      const result: Array<{ timestamp: string, x: number, y: number }> = await this.metricService.getData(req.query.name, parseInt(req.query.timestamp, undefined));
+      const result: Array<{ timestamp: string, x: number, y: number }> = await this.metricService.getData(req.query.name, parseInt(req.query.timestamp, undefined), req.query.token);
       res.json(result);
     });
 

@@ -3,6 +3,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 <script>
+    var token = decodeURI(getQueryStringParameter('token'));
+
     var colors = ['#05A8AA', '#B8D5B8', '#D7B49E', '#DC602E', '#BC412B'];
 
     var charts = {};
@@ -15,7 +17,7 @@
     }
 
     function initialize(name) {
-        $.get(`/series?name=${name}&timestamp=0`, function (data) {
+        $.get(`/series?name=${name}&timestamp=0&token=${token}`, function (data) {
             initializeChart(name, data);
 
             if (data.length === 0) {
@@ -31,7 +33,7 @@
     }
 
     function updateChart(name) {
-        $.get(`/series?name=${name}&timestamp=${lastTimestamps[name]}`, function (data) {
+        $.get(`/series?name=${name}&timestamp=${lastTimestamps[name]}&token=${token}`, function (data) {
 
             if (data.length === 0) {
                 return;

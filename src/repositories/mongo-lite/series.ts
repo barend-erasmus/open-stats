@@ -15,7 +15,7 @@ export class MetricRepository implements ISeriesRepository {
 
     }
 
-    public async saveData(name: string, value: number, timestamp: number): Promise<boolean> {
+    public async saveData(name: string, value: number, timestamp: number, token: string): Promise<boolean> {
         if (!this.db) {
             this.db = await mongo.MongoClient.connect(this.uri);
         }
@@ -25,6 +25,7 @@ export class MetricRepository implements ISeriesRepository {
         const result: any = await collection.insertOne({
             name,
             timestamp,
+            token,
             value,
         });
 
@@ -33,19 +34,21 @@ export class MetricRepository implements ISeriesRepository {
         return true;
     }
 
-    public async listNames(): Promise<string[]> {
+    public async listNames(token: string): Promise<string[]> {
         if (!this.db) {
             this.db = await mongo.MongoClient.connect(this.uri);
         }
 
         const collection: mongo.Collection = this.db.collection("series");
 
-        const result: any[] = await collection.distinct('name', {});
+        const result: any[] = await collection.distinct('name', {
+            token,
+        });
 
         return result;
     }
 
-    public async getData(name: string, timestamp: number): Promise<Array<{ timestamp: string, x: number, y: number }>> {
+    public async getData(name: string, timestamp: number, token: string): Promise<Array<{ timestamp: string, x: number, y: number }>> {
 
         if (!this.db) {
             this.db = await mongo.MongoClient.connect(this.uri);
@@ -56,6 +59,7 @@ export class MetricRepository implements ISeriesRepository {
         const result: any[] = await collection.find({
             name,
             timestamp: { $gt: timestamp },
+            token,
         })
             .sort({
                 timestamp: 1,

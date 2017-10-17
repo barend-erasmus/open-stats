@@ -1,7 +1,7 @@
 export interface ISeriesRepository {
 
-    saveData(name: string, value: number, timestamp: number): Promise<boolean>;
-    getData(name: string, timestamp: number): Promise<Array<{ timestamp: string, x: number, y: number }>>;
-    listNames(): Promise<string[]>;
+    saveData(name: string, value: number, timestamp: number, token: string): Promise<boolean>;
+    getData(name: string, timestamp: number, token: string): Promise<Array<{ timestamp: string, x: number, y: number }>>;
+    listNames(token: string): Promise<string[]>;
     clearStaleData(hours: number): Promise<boolean>;
 }

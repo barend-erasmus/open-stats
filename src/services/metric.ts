@@ -22,20 +22,20 @@ export class MetricService {
 
     }
 
-    public log(type: string, name: string, value: number): void {
+    public log(type: string, name: string, value: number, token: string): void {
         switch (type) {
             case 'counter':
-                this.updateCounter(name, value);
+                this.updateCounter(name, value, token || 'default');
                 break;
             case 'gauge':
-                this.updateGauge(name, value);
+                this.updateGauge(name, value, token || 'default');
                 break;
             case 'timing':
-                this.updateTiming(name, value);
+                this.updateTiming(name, value, token || 'default');
                 break;
-
         }
-        this.updateCounter('open-stats.metrics', 1);
+
+        this.updateCounter('open-stats.metrics', 1, token || 'default');
 
         this.onLog(type, name, value);
     }
@@ -47,20 +47,20 @@ export class MetricService {
         const aggregate: Aggregate = this.aggerate(intervalInSeconds);
 
         for (const counter of aggregate.counters) {
-            await this.seriesRepository.saveData(counter.name, counter.value, timestamp);
-            await this.seriesRepository.saveData(`${counter.name}.rate`, counter.value / intervalInSeconds, timestamp);
+            await this.seriesRepository.saveData(counter.name, counter.value, timestamp, counter.token);
+            await this.seriesRepository.saveData(`${counter.name}.rate`, counter.value / intervalInSeconds, timestamp, counter.token);
         }
 
         for (const gauge of aggregate.gauges) {
-            await this.seriesRepository.saveData(gauge.name, gauge.value, timestamp);
+            await this.seriesRepository.saveData(gauge.name, gauge.value, timestamp, gauge.token);
         }
 
         for (const timing of aggregate.timings) {
-            await this.seriesRepository.saveData(`${timing.name}.maximum`, timing.maximum, timestamp);
-            await this.seriesRepository.saveData(`${timing.name}.mean`, timing.mean, timestamp);
-            await this.seriesRepository.saveData(`${timing.name}.median`, timing.median, timestamp);
-            await this.seriesRepository.saveData(`${timing.name}.minimum`, timing.minimum, timestamp);
-            await this.seriesRepository.saveData(`${timing.name}.standardDeviation`, timing.standardDeviation, timestamp);
+            await this.seriesRepository.saveData(`${timing.name}.maximum`, timing.maximum, timestamp, timing.token);
+            await this.seriesRepository.saveData(`${timing.name}.mean`, timing.mean, timestamp, timing.token);
+            await this.seriesRepository.saveData(`${timing.name}.median`, timing.median, timestamp, timing.token);
+            await this.seriesRepository.saveData(`${timing.name}.minimum`, timing.minimum, timestamp, timing.token);
+            await this.seriesRepository.saveData(`${timing.name}.standardDeviation`, timing.standardDeviation, timestamp, timing.token);
         }
     }
 
@@ -68,73 +68,87 @@ export class MetricService {
 
         const aggregateCounters: Counter[] = [];
 
-        for (const name in this.counters) {
-            aggregateCounters.push(new Counter(name, this.counters[name], this.counters[name] / intervalInSeconds));
-
-            this.counters[name] = 0;
-        }
+        for (const token in this.counters)
+            for (const name in this.counters[token]) {
+                aggregateCounters.push(new Counter(name, this.counters[token][name], this.counters[token][name] / intervalInSeconds, token));
+            }
 
         this.counters = {};
 
         const aggregateGauges: Gauge[] = [];
 
-        for (const name in this.gauges) {
-            aggregateGauges.push(new Gauge(name, this.gauges[name]));
-        }
+        for (const token in this.gauges)
+            for (const name in this.gauges[token]) {
+                aggregateGauges.push(new Gauge(name, this.gauges[token][name], token));
+            }
 
         const aggregateTimings: Timing[] = [];
 
-        for (const name in this.timings) {
-            aggregateTimings.push(new Timing(
-                name,
-                this.statsService.calculateMean(this.timings[name]),
-                this.statsService.calculateMedian(this.timings[name]),
-                this.statsService.calculateMinimum(this.timings[name]),
-                this.statsService.calculateMaximum(this.timings[name]),
-                this.statsService.calculateStandardDeviation(this.timings[name]),
-            ));
-
-            this.timings[name] = [];
-        }
+        for (const token in this.timings)
+            for (const name in this.timings[token]) {
+                aggregateTimings.push(new Timing(
+                    name,
+                    this.statsService.calculateMean(this.timings[token][name]),
+                    this.statsService.calculateMedian(this.timings[token][name]),
+                    this.statsService.calculateMinimum(this.timings[token][name]),
+                    this.statsService.calculateMaximum(this.timings[token][name]),
+                    this.statsService.calculateStandardDeviation(this.timings[token][name]),
+                    token,
+                ));
+            }
 
         this.timings = {};
 
         return new Aggregate(aggregateCounters, aggregateGauges, aggregateTimings);
     }
 
-    public async getData(name: string, timestamp: number): Promise<Array<{ timestamp: string, x: number, y: number }>> {
-        return this.seriesRepository.getData(name, timestamp);
+    public async getData(name: string, timestamp: number, token: string): Promise<Array<{ timestamp: string, x: number, y: number }>> {
+        return this.seriesRepository.getData(name, timestamp, token || 'default');
     }
 
-    public async listNames(): Promise<string[]> {
-        return this.seriesRepository.listNames();
+    public async listNames(token: string): Promise<string[]> {
+        return this.seriesRepository.listNames(token || 'default');
     }
 
     public async clearStaleData(hours: number): Promise<boolean> {
         return this.seriesRepository.clearStaleData(hours);
     }
 
-    private updateCounter(name: string, value: number): void {
-        if (!this.counters[name]) {
-            this.counters[name] = value;
+    private updateCounter(name: string, value: number, token: string): void {
+
+        if (!this.counters[token]) {
+            this.counters[token] = {};
+        }
+
+        if (!this.counters[token][name]) {
+            this.counters[token][name] = value;
         } else {
-            this.counters[name] += value;
+            this.counters[token][name] += value;
         }
     }
 
-    private updateGauge(name: string, value: number): void {
-        if (!this.gauges[name]) {
-            this.gauges[name] = value;
+    private updateGauge(name: string, value: number, token: string): void {
+
+        if (!this.gauges[token]) {
+            this.gauges[token] = {};
+        }
+
+        if (!this.gauges[token][name]) {
+            this.gauges[token][name] = value;
         } else {
-            this.gauges[name] = value;
+            this.gauges[token][name] = value;
         }
     }
 
-    private updateTiming(name: string, value: number): void {
-        if (!this.timings[name]) {
-            this.timings[name] = [value];
+    private updateTiming(name: string, value: number, token: string): void {
+        if (!this.timings[token]) {
+            this.timings[token] = {};
+        }
+
+        if (!this.timings[token][name]) {
+            this.timings[token][name] = [value];
         } else {
-            this.timings[name].push(value);
+            this.timings[token][name].push(value);
         }
     }
 }

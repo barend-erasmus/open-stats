@@ -26,7 +26,7 @@ export class WebSocketInterface {
 
     private async onMessage(message: string): Promise<void> {
         const data: any = JSON.parse(message);
-        await this.metricService.log(data.type, data.name, data.value);
+        await this.metricService.log(data.type, data.name, data.value, data.token);
 
     }
 }

@@ -27,9 +27,19 @@ export class UDPInterface {
         const messages: string[] = dataBuffer.toString().split(/\n/g);
 
         for (const message of messages) {
-            const name: string = message.substring(0, message.indexOf(":"));
-            const value: string = message.substring(message.indexOf(":") + 1, message.indexOf("|"));
-            const letter: string = message.substring(message.indexOf("|") + 1);
+            const splittedMessage: string[] = message.split('|');
+
+            const name: string = splittedMessage[0].split(':')[0];
+            const value: string = splittedMessage[0].split(':')[1];
+            const letter: string = splittedMessage[1];
+
+            const tags: {} = {};
+
+            const rawTags: string[] = splittedMessage[2]? splittedMessage[2].substring(1).split(',') : [];
+
+            for (const item of rawTags) {
+                tags[item.split(':')[0]] = item.split(':')[1];
+            }
 
             let type: string = null;
 
@@ -45,7 +55,7 @@ export class UDPInterface {
                     break;
             }
 
-            await this.metricService.log(type, name, parseFloat(value));
+            await this.metricService.log(type, name, parseFloat(value), tags['token']);
         }
     }
 }
