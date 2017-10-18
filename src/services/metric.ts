@@ -52,20 +52,20 @@ export class MetricService {
         const aggregate: Aggregate = this.aggerate(intervalInSeconds);
 
         for (const counter of aggregate.counters) {
-            await this.seriesRepository.saveData(counter.name, counter.value, timestamp, counter.token, {});
-            await this.seriesRepository.saveData(`${counter.name}.rate`, counter.value / intervalInSeconds, timestamp, counter.token, {});
+            await this.seriesRepository.saveData(counter.name, counter.value, timestamp, counter.token, counter.tags);
+            await this.seriesRepository.saveData(`${counter.name}.rate`, counter.value / intervalInSeconds, timestamp, counter.token, counter.tags);
         }
 
         for (const gauge of aggregate.gauges) {
-            await this.seriesRepository.saveData(gauge.name, gauge.value, timestamp, gauge.token, {});
+            await this.seriesRepository.saveData(gauge.name, gauge.value, timestamp, gauge.token, gauge.tags);
         }
 
         for (const timing of aggregate.timings) {
-            await this.seriesRepository.saveData(`${timing.name}.maximum`, timing.maximum, timestamp, timing.token, {});
-            await this.seriesRepository.saveData(`${timing.name}.mean`, timing.mean, timestamp, timing.token, {});
-            await this.seriesRepository.saveData(`${timing.name}.median`, timing.median, timestamp, timing.token, {});
-            await this.seriesRepository.saveData(`${timing.name}.minimum`, timing.minimum, timestamp, timing.token, {});
-            await this.seriesRepository.saveData(`${timing.name}.standardDeviation`, timing.standardDeviation, timestamp, timing.token, {});
+            await this.seriesRepository.saveData(`${timing.name}.maximum`, timing.maximum, timestamp, timing.token, timing.tags);
+            await this.seriesRepository.saveData(`${timing.name}.mean`, timing.mean, timestamp, timing.token, timing.tags);
+            await this.seriesRepository.saveData(`${timing.name}.median`, timing.median, timestamp, timing.token, timing.tags);
+            await this.seriesRepository.saveData(`${timing.name}.minimum`, timing.minimum, timestamp, timing.token, timing.tags);
+            await this.seriesRepository.saveData(`${timing.name}.standardDeviation`, timing.standardDeviation, timestamp, timing.token, timing.tags);
         }
     }
 

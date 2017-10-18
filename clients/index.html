@@ -26,8 +26,9 @@
             xmlhttp.open("POST", "http://open-stats.openservices.co.za/api/metrics/log", false);
             xmlhttp.setRequestHeader("Content-type", "application/json");
             xmlhttp.send(JSON.stringify({
-                type: 'series',
+                type: 'timing',
                 name: `Browser.TimeOnCurrentPageInSeconds`,
+                token: 'ApplicationName-Browser',
                 value: TimeMe.getTimeOnCurrentPageInSeconds(),
                 tags: {
                     pathName: window.location.pathname,
