@@ -8,10 +8,8 @@ import { UDPInterface } from "./udp-interface";
 describe("UDPInterface", () => {
     describe("onMessage", () => {
         it("should call MetricService.log once given valid message", async () => {
-            
-            const metricService: MetricService = new MetricService(null, (type: string, name: string, value: number) => {
 
-            });
+            const metricService: MetricService = new MetricService(null, null);
 
             const logSpy = sinon.spy(metricService, 'log');
 
@@ -23,10 +21,8 @@ describe("UDPInterface", () => {
         });
 
         it("should call MetricService.log twice given valid messages", async () => {
-            
-            const metricService: MetricService = new MetricService(null, (type: string, name: string, value: number) => {
 
-            });
+            const metricService: MetricService = new MetricService(null, null);
 
             const logSpy = sinon.spy(metricService, 'log');
 
@@ -38,10 +34,8 @@ describe("UDPInterface", () => {
         });
 
         it("should call MetricService.log once given valid message with tags", async () => {
-            
-            const metricService: MetricService = new MetricService(null, (type: string, name: string, value: number) => {
 
-            });
+            const metricService: MetricService = new MetricService(null, null);
 
             const logSpy = sinon.spy(metricService, 'log');
 

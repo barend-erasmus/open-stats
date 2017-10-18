@@ -3,6 +3,7 @@ export class Gauge {
         public name: string,
         public value: number,
         public token: string,
+        public tags: {},
     ) {
 
     }

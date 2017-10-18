@@ -26,9 +26,13 @@
             xmlhttp.open("POST", "http://open-stats.openservices.co.za/api/metrics/log", false);
             xmlhttp.setRequestHeader("Content-type", "application/json");
             xmlhttp.send(JSON.stringify({
-                type: 'timing',
-                name: `Browser.${window.location.pathname.toLowerCase().replace(/[:.]/g, '').replace(/\//g, '_')}`,
-                value: TimeMe.getTimeOnCurrentPageInSeconds()
+                type: 'series',
+                name: `Browser.TimeOnCurrentPageInSeconds`,
+                value: TimeMe.getTimeOnCurrentPageInSeconds(),
+                tags: {
+                    pathName: window.location.pathname,
+                    userAgent: navigator.userAgent,
+                }
             }));
         }
     };

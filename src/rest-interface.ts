@@ -55,6 +55,11 @@ export class RESTInterface {
       res.json(result);
     });
 
+    this.app.post("/api/metrics/seriesAggregated", async (req, res) => {
+      const result: Array<{ timestamp: string, x: number, y: number }> = await this.metricService.getAggregatedData(req.body.name, parseInt(req.body.timestamp, undefined), req.body.token, req.body.tags, req.body.aggregate, parseInt(req.body.intervalInMinutes, undefined));
+      res.json(result);
+    });
+
     this.app.get("/api/metrics/chart", async (req, res) => {
       res.render('api/metrics/chart');
     });

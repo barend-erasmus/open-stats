@@ -7,6 +7,7 @@ export class Timing {
         public maximum: number,
         public standardDeviation: number,
         public token: string,
+        public tags: {},
     ) {
 
     }

@@ -19,9 +19,12 @@
         xmlhttp.setRequestHeader("Content-type", "application/json");
         xmlhttp.send(JSON.stringify({
             type: 'series',
-            name: `simple.series`,
-            value: Math.random() * 500,
-            timestamp: new Date().getTime()
+            name: `Browser.TimeOnCurrentPageInSeconds`,
+            value: Math.random() * 4000,
+            tags: {
+                pathName: window.location.pathname,
+                userAgent: navigator.userAgent,
+            }
         }));
     }, 1500)
 </script>

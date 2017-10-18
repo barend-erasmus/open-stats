@@ -25,22 +25,24 @@ export class MetricService {
     public async log(type: string, name: string, value: number, token: string, tags: {}): Promise<void> {
         switch (type) {
             case 'counter':
-                this.updateCounter(name, value, token || 'default');
+                this.updateCounter(name, value, token || 'default', tags);
                 break;
             case 'gauge':
-                this.updateGauge(name, value, token || 'default');
+                this.updateGauge(name, value, token || 'default', tags);
                 break;
             case 'timing':
-                this.updateTiming(name, value, token || 'default');
+                this.updateTiming(name, value, token || 'default', tags);
                 break;
             case 'series':
                 await this.seriesRepository.saveData(name, value, new Date().getTime(), token || 'default', tags);
                 break;
         }
 
-        this.updateCounter('open-stats.metrics', 1, token || 'default');
+        this.updateCounter('open-stats.metrics', 1, token || 'default', tags);
 
-        this.onLog(type, name, value, tags);
+        if (this.onLog) {
+            this.onLog(type, name, value, tags);
+        }
     }
 
     public async sendAggerate(intervalInSeconds: number): Promise<void> {
@@ -71,42 +73,56 @@ export class MetricService {
 
         const aggregateCounters: Counter[] = [];
 
-        for (const token in this.counters)
-            for (const name in this.counters[token]) {
-                aggregateCounters.push(new Counter(name, this.counters[token][name], this.counters[token][name] / intervalInSeconds, token));
+        for (const token in this.counters) {
+            for (const tagBucket in this.counters[token]) {
+                for (const name in this.counters[token][tagBucket]) {
+                    aggregateCounters.push(new Counter(name, this.counters[token][tagBucket][name].value, this.counters[token][tagBucket][name].value / intervalInSeconds, token, null));
+                }
             }
+        }
 
         this.counters = {};
 
         const aggregateGauges: Gauge[] = [];
 
-        for (const token in this.gauges)
-            for (const name in this.gauges[token]) {
-                aggregateGauges.push(new Gauge(name, this.gauges[token][name], token));
+        for (const token in this.gauges) {
+            for (const tagBucket in this.gauges[token]) {
+                for (const name in this.gauges[token][tagBucket]) {
+                    aggregateGauges.push(new Gauge(name, this.gauges[token][tagBucket][name].value, token, null));
+                }
             }
+        }
 
         const aggregateTimings: Timing[] = [];
 
-        for (const token in this.timings)
-            for (const name in this.timings[token]) {
-                aggregateTimings.push(new Timing(
-                    name,
-                    this.statsService.calculateMean(this.timings[token][name]),
-                    this.statsService.calculateMedian(this.timings[token][name]),
-                    this.statsService.calculateMinimum(this.timings[token][name]),
-                    this.statsService.calculateMaximum(this.timings[token][name]),
-                    this.statsService.calculateStandardDeviation(this.timings[token][name]),
-                    token,
-                ));
+        for (const token in this.timings) {
+            for (const tagBucket in this.timings[token]) {
+                for (const name in this.timings[token][tagBucket]) {
+                    aggregateTimings.push(new Timing(
+                        name,
+                        this.statsService.calculateMean(this.timings[token][tagBucket][name].values),
+                        this.statsService.calculateMedian(this.timings[token][tagBucket][name].values),
+                        this.statsService.calculateMinimum(this.timings[token][tagBucket][name].values),
+                        this.statsService.calculateMaximum(this.timings[token][tagBucket][name].values),
+                        this.statsService.calculateStandardDeviation(this.timings[token][tagBucket][name].values),
+                        token,
+                        null,
+                    ));
+                }
             }
+        }
 
         this.timings = {};
 
         return new Aggregate(aggregateCounters, aggregateGauges, aggregateTimings);
     }
 
-    public async getData(name: string, timestamp: number, token: string, tags: {}): Promise<Array<{ timestamp: string, x: number, y: number }>> {
+    public async getData(name: string, timestamp: number, token: string, tags: {}): Promise<Array<{ timestamp: string, x: number, y: number, tags: {} }>> {
         return this.seriesRepository.getData(name, timestamp, token || 'default', tags);
+    }
+
+    public async getAggregatedData(name: string, timestamp: number, token: string, tags: {}, aggregate: string, intervalInMinutes: number): Promise<Array<{ timestamp: string, x: number, y: number, tags: {} }>> {
+        return this.seriesRepository.getAggregatedData(name, timestamp, token || 'default', tags, aggregate || 'average', intervalInMinutes || 1);
     }
 
     public async listNames(token: string): Promise<string[]> {
@@ -117,41 +133,69 @@ export class MetricService {
         return this.seriesRepository.clearStaleData(hours);
     }
 
-    private updateCounter(name: string, value: number, token: string): void {
+    private updateCounter(name: string, value: number, token: string, tags: {}): void {
+
+        const tagBucket: string = tags && Object.keys(tags).length > 0 ? Object.keys(tags).map((x) => `${x}:${tags[x]}`).sort().join(',') : 'default';
 
         if (!this.counters[token]) {
             this.counters[token] = {};
         }
 
-        if (!this.counters[token][name]) {
-            this.counters[token][name] = value;
+        if (!this.counters[token][tagBucket]) {
+            this.counters[token][tagBucket] = {};
+        }
+
+        if (!this.counters[token][tagBucket][name]) {
+            this.counters[token][tagBucket][name] = {
+                tags: tags,
+                value: value
+            };
         } else {
-            this.counters[token][name] += value;
+            this.counters[token][tagBucket][name].value += value;
         }
     }
 
-    private updateGauge(name: string, value: number, token: string): void {
+    private updateGauge(name: string, value: number, token: string, tags: {}): void {
+
+        const tagBucket: string = tags && Object.keys(tags).length > 0 ? Object.keys(tags).map((x) => `${x}:${tags[x]}`).sort().join(',') : 'default';
 
         if (!this.gauges[token]) {
             this.gauges[token] = {};
         }
 
-        if (!this.gauges[token][name]) {
-            this.gauges[token][name] = value;
+        if (!this.gauges[token][tagBucket]) {
+            this.gauges[token][tagBucket] = {};
+        }
+
+        if (!this.gauges[token][tagBucket][name]) {
+            this.gauges[token][tagBucket][name] = {
+                tags: tags,
+                value: value
+            };
         } else {
-            this.gauges[token][name] = value;
+            this.gauges[token][tagBucket][name].value = value;
         }
     }
 
-    private updateTiming(name: string, value: number, token: string): void {
+    private updateTiming(name: string, value: number, token: string, tags: {}): void {
+
+        const tagBucket: string = tags && Object.keys(tags).length > 0 ? Object.keys(tags).map((x) => `${x}:${tags[x]}`).sort().join(',') : 'default';
+
         if (!this.timings[token]) {
             this.timings[token] = {};
         }
 
-        if (!this.timings[token][name]) {
-            this.timings[token][name] = [value];
+        if (!this.timings[token][tagBucket]) {
+            this.timings[token][tagBucket] = {};
+        }
+
+        if (!this.timings[token][tagBucket][name]) {
+            this.timings[token][tagBucket][name] = {
+                tags: tags,
+                values: [value],
+            };
         } else {
-            this.timings[token][name].push(value);
+            this.timings[token][tagBucket][name].values.push(value);
         }
     }
 }

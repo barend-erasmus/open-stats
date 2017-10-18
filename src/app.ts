@@ -15,7 +15,7 @@ import { WebSocketInterface } from "./web-socket-interface";
 import { MetricService } from "./services/metric";
 
 // imports repositories
-import { MetricRepository } from "./repositories//mongo-lite/series";
+import { SeriesRepository } from "./repositories//mongo-lite/series";
 import { ISeriesRepository } from "./repositories/series";
 
 const argv = yargs.argv;
@@ -26,6 +26,7 @@ const logger = winston.createLogger({
         filename: path.join(__dirname, 'open-stats.log'),
         level: 'info',
       }),
+      new winston.transports.Console(),
     ],
   });
 
@@ -37,12 +38,12 @@ const httpServer = http.createServer(app);
 const tcpAdminInterface: TCPAdminInterface = new TCPAdminInterface("0.0.0.0", 8126);
 tcpAdminInterface.start();
 
-const seriesRepository: ISeriesRepository = new MetricRepository('mongodb://localhost:27017/open-stats-006', (name: string, value: number) => {
-    // tcpAdminInterface.sendUpdateToAllSockets(name, value);
-    console.log(`${name}: ${value}`);
+const seriesRepository: ISeriesRepository = new SeriesRepository('mongodb://localhost:27017/open-stats-009', (name: string, value: number) => {
+    logger.info(`${name}: ${value}`);
 });
 
 const metricService: MetricService = new MetricService(seriesRepository, (type: string, name: string, value: number) => {
+    // logger.info(`${name}: ${value}`);
     tcpAdminInterface.sendUpdateToAllSockets(name, value);
 });
 
@@ -58,7 +59,7 @@ const restInterface: RESTInterface = new RESTInterface(app, metricService);
 
 httpServer.listen(argv.port || 3000);
 
-const jobAggregate = new cron.CronJob('0 */1 * * * *', async () => {
+const jobAggregate = new cron.CronJob('*/20 * * * * *', async () => {
 
     await metricService.sendAggerate(60);
 

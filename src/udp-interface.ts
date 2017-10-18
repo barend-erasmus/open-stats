@@ -31,6 +31,7 @@ export class UDPInterface {
         const messages: string[] = dataBuffer.toString().split(/\n/g);
 
         for (const message of messages) {
+            
             const splittedMessage: string[] = message.split('|');
 
             const name: string = splittedMessage[0].split(':')[0];
@@ -44,6 +45,9 @@ export class UDPInterface {
             for (const item of rawTags) {
                 tags[item.split(':')[0]] = item.split(':')[1];
             }
+
+            const token: string = tags['token'];
+            tags['token'] = undefined;
 
             let type: string = null;
 
@@ -62,7 +66,7 @@ export class UDPInterface {
                     break;
             }
 
-            await this.metricService.log(type, name, parseFloat(value), tags['token'], tags);
+            await this.metricService.log(type, name, parseFloat(value), token, tags);
         }
     }
 }

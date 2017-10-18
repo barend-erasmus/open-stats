@@ -4,6 +4,7 @@ export class Counter {
         public value: number,
         public rate: number,
         public token: string,
+        public tags: {},
     ) {
 
     }

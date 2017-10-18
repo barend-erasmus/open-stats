@@ -8,7 +8,7 @@ import { Aggregate } from './../models/aggregate';
 describe("MetricService", () => {
     describe("log - Counter", () => {
         it("should return value given single log value", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('counter', 'simple.counter', 5, 'token', {});
 
@@ -18,7 +18,7 @@ describe("MetricService", () => {
         });
 
         it("should return rate given single log value", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('counter', 'simple.counter', 5, 'token', {});
 
@@ -28,7 +28,7 @@ describe("MetricService", () => {
         });
 
         it("should return value given multiple log values", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('counter', 'simple.counter', 5, 'token', {});
             await metricService.log('counter', 'simple.counter', -2, 'token', {});
@@ -40,7 +40,7 @@ describe("MetricService", () => {
         });
 
         it("should return rate given multiple log values", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('counter', 'simple.counter', 5, 'token', {});
             await metricService.log('counter', 'simple.counter', -2, 'token', {});
@@ -52,7 +52,7 @@ describe("MetricService", () => {
         });
 
         it("should clear counters when aggregate is called", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('counter', 'simple.counter', 5, 'token', {});
 
@@ -66,7 +66,7 @@ describe("MetricService", () => {
 
     describe("log - Gauge", () => {
         it("should return value given single log value", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('gauge', 'simple.gauge', 5, 'token', {});
 
@@ -76,7 +76,7 @@ describe("MetricService", () => {
         });
 
         it("should return value given multiple log values", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('gauge', 'simple.gauge', 5, 'token', {});
             await metricService.log('gauge', 'simple.gauge', -2, 'token', {});
@@ -88,7 +88,7 @@ describe("MetricService", () => {
         });
 
         it("should not clear gauges when aggregate is called", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('gauge', 'simple.gauge', 5, 'token', {});
 
@@ -102,7 +102,7 @@ describe("MetricService", () => {
 
     describe("log - Timing", () => {
         it("should return mimimum given single log value", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
 
@@ -112,7 +112,7 @@ describe("MetricService", () => {
         });
 
         it("should return minimum given multiple log values", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
             await metricService.log('timing', 'simple.timing', -2, 'token', {});
@@ -124,7 +124,7 @@ describe("MetricService", () => {
         });
 
         it("should return maximum given single log value", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
 
@@ -134,7 +134,7 @@ describe("MetricService", () => {
         });
 
         it("should return maximum given multiple log values", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
             await metricService.log('timing', 'simple.timing', -2, 'token', {});
@@ -146,7 +146,7 @@ describe("MetricService", () => {
         });
 
         it("should return mean given single log value", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
 
@@ -156,7 +156,7 @@ describe("MetricService", () => {
         });
 
         it("should return mean given multiple log values", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
             await metricService.log('timing', 'simple.timing', -2, 'token', {});
@@ -168,7 +168,7 @@ describe("MetricService", () => {
         });
 
         it("should return median given single log value", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
 
@@ -178,7 +178,7 @@ describe("MetricService", () => {
         });
 
         it("should return median given multiple log values", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
             await metricService.log('timing', 'simple.timing', -2, 'token', {});
@@ -190,7 +190,7 @@ describe("MetricService", () => {
         });
 
         it("should return standard deviation given single log value", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
 
@@ -200,7 +200,7 @@ describe("MetricService", () => {
         });
 
         it("should return standard deviation given multiple log values", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
             await metricService.log('timing', 'simple.timing', -2, 'token', {});
@@ -212,7 +212,7 @@ describe("MetricService", () => {
         });
 
         it("should clear timings when aggregate is called", async () => {
-            const metricService: MetricService = new MetricService(null, () => {});
+            const metricService: MetricService = new MetricService(null, null);
 
             await metricService.log('timing', 'simple.timing', 5, 'token', {});
 

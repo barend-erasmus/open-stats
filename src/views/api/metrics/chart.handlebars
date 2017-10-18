@@ -4,6 +4,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 <script>
     var token = decodeURI(getQueryStringParameter('token'));
+    var aggregate = getQueryStringParameter('aggregate') ? decodeURI(getQueryStringParameter('aggregate')) : 'average';
+    var intervalInMinutes = 1;
 
     var colors = ['#05A8AA', '#B8D5B8', '#D7B49E', '#DC602E', '#BC412B'];
 
@@ -17,10 +19,12 @@
     }
 
     function initialize(name) {
-        $.post(`/api/metrics/series`, {
+        $.post(`/api/metrics/seriesAggregated`, {
             name,
             token,
-            timestamp: 0
+            timestamp: 0,
+            aggregate,
+            intervalInMinutes,
         }, function (data) {
             initializeChart(name, data);
 
@@ -28,7 +32,7 @@
                 return;
             }
 
-            lastTimestamps[name] = data[data.length - 1].x;
+            lastTimestamps[name] = data[data.length - 1].x + 60001;
 
             setInterval(function () {
                 updateChart(name);
@@ -37,10 +41,12 @@
     }
 
     function updateChart(name) {
-        $.post(`/api/metrics/series`, {
+        $.post(`/api/metrics/seriesAggregated`, {
             name,
             token,
-            timestamp: lastTimestamps[name]
+            timestamp: lastTimestamps[name],
+            aggregate,
+            intervalInMinutes,
         }, function (data) {
 
             if (data.length === 0) {
@@ -61,7 +67,7 @@
 
             charts[name].update(0);
 
-            lastTimestamps[name] = data[data.length - 1].x;
+            lastTimestamps[name] = data[data.length - 1].x + 60001;
         });
     }
 
