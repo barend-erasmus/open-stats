@@ -76,7 +76,7 @@ export class MetricService {
         for (const token in this.counters) {
             for (const tagBucket in this.counters[token]) {
                 for (const name in this.counters[token][tagBucket]) {
-                    aggregateCounters.push(new Counter(name, this.counters[token][tagBucket][name].value, this.counters[token][tagBucket][name].value / intervalInSeconds, token, null));
+                    aggregateCounters.push(new Counter(name, this.counters[token][tagBucket][name].value, this.counters[token][tagBucket][name].value / intervalInSeconds, token, this.counters[token][tagBucket][name].tags));
                 }
             }
         }
@@ -88,7 +88,7 @@ export class MetricService {
         for (const token in this.gauges) {
             for (const tagBucket in this.gauges[token]) {
                 for (const name in this.gauges[token][tagBucket]) {
-                    aggregateGauges.push(new Gauge(name, this.gauges[token][tagBucket][name].value, token, null));
+                    aggregateGauges.push(new Gauge(name, this.gauges[token][tagBucket][name].value, token, this.gauges[token][tagBucket][name].tags));
                 }
             }
         }
@@ -106,7 +106,7 @@ export class MetricService {
                         this.statsService.calculateMaximum(this.timings[token][tagBucket][name].values),
                         this.statsService.calculateStandardDeviation(this.timings[token][tagBucket][name].values),
                         token,
-                        null,
+                        this.timings[token][tagBucket][name].tags,
                     ));
                 }
             }
