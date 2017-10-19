@@ -4,8 +4,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 <script>
     var token = decodeURI(getQueryStringParameter('token'));
-    var aggregate = getQueryStringParameter('aggregate') ? decodeURI(getQueryStringParameter('aggregate')) : 'average';
-    var intervalInMinutes = 1;
 
     var colors = ['#05A8AA', '#B8D5B8', '#D7B49E', '#DC602E', '#BC412B'];
 
@@ -13,12 +11,16 @@
 
     var lastTimestamps = {};
 
-    for (var name of decodeURI(getQueryStringParameter('names')).split('|')) {
-        $('#chart-list').append(`<div class="col-md-6"><canvas id="chart-${name}"></canvas></div>`);
-        initialize(name);
+    for (var metric of decodeURI(getQueryStringParameter('metrics')).split('|')) {
+       
+        const splittedMetric = metric.split(',');
+
+         $('#chart-list').append(`<div class="col-md-12"><canvas id="chart-${splittedMetric[0]}"></canvas></div>`);
+
+        initialize(splittedMetric[0], splittedMetric[1], parseInt(splittedMetric[2]));
     }
 
-    function initialize(name) {
+    function initialize(name, aggregate, intervalInMinutes) {
         $.post(`/api/metrics/seriesAggregated`, {
             name,
             token,
@@ -32,15 +34,15 @@
                 return;
             }
 
-            lastTimestamps[name] = data[data.length - 1].x + 60001;
+            lastTimestamps[name] = data[data.length - 1].x + (intervalInMinutes * 60000) + 1;
 
             setInterval(function () {
-                updateChart(name);
+                updateChart(name, aggregate, intervalInMinutes);
             }, 5000);
         });
     }
 
-    function updateChart(name) {
+    function updateChart(name, aggregate, intervalInMinutes) {
         $.post(`/api/metrics/seriesAggregated`, {
             name,
             token,
@@ -91,10 +93,12 @@
                 }]
             },
             options: {
-                bezierCurve: false,
                 elements: {
                     point: {
                         radius: 0
+                    },
+                    line: {
+                        tension: 0,
                     }
                 },
                 scales: {
