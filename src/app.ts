@@ -38,7 +38,7 @@ const httpServer = http.createServer(app);
 const tcpAdminInterface: TCPAdminInterface = new TCPAdminInterface("0.0.0.0", 8126);
 tcpAdminInterface.start();
 
-const seriesRepository: ISeriesRepository = new SeriesRepository('mongodb://localhost:27017/open-stats-009', (name: string, value: number) => {
+const seriesRepository: ISeriesRepository = new SeriesRepository('mongodb://localhost:27017/open-stats-001', (name: string, value: number) => {
     logger.info(`${name}: ${value}`);
 });
 
@@ -61,7 +61,7 @@ httpServer.listen(argv.port || 3000);
 
 const jobAggregate = new cron.CronJob('*/20 * * * * *', async () => {
 
-    await metricService.sendAggerate(60);
+    await metricService.sendAggerate(20);
 
     logger.info('metricService.sendAggerate');
 

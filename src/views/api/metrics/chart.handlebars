@@ -56,7 +56,7 @@
             data.forEach((x) => {
                 charts[name].data.datasets[0].data.push({
                     x: new Date(x.x),
-                    y: x.y,
+                    y: Math.round(x.y * 100) / 100,
                 });
 
                 if (charts[name].data.datasets[0].data.length >= 300) {
@@ -83,7 +83,7 @@
                     data: data.map((x) => {
                         return {
                             x: new Date(x.x),
-                            y: x.y,
+                            y: Math.round(x.y * 100) / 100,
                         };
                     }),
                     backgroundColor: 'transparent',
