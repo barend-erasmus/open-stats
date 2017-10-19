@@ -46,8 +46,9 @@ export class UDPInterface {
                 tags[item.split(':')[0]] = item.split(':')[1];
             }
 
-            const token: string = tags.token;
-            tags.token = undefined;
+            const token: string = tags['token'] || tags['Token'];
+            tags['token'] = undefined;
+            tags['Token'] = undefined;
 
             let type: string = null;
 
