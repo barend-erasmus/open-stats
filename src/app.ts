@@ -43,7 +43,7 @@ const seriesRepository: ISeriesRepository = new SeriesRepository('mongodb://loca
 });
 
 const metricService: MetricService = new MetricService(seriesRepository, (type: string, name: string, value: number) => {
-    // logger.info(`${name}: ${value}`);
+    logger.info(`${name}: ${value}`);
     tcpAdminInterface.sendUpdateToAllSockets(name, value);
 });
 

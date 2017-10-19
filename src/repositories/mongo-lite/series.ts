@@ -128,43 +128,47 @@ export class SeriesRepository implements ISeriesRepository {
                         hours: '$timestampElements.hours',
                         // minutes: '$timestampElements.minutes',
                         minutes: {
-                            "$subtract": [ 
-                                { "$minute": "$timestampDate" },
-                                { "$mod": [{ "$minute": "$timestampDate"}, intervalInMinutes] }
-                            ]
+                            $subtract: [
+                                { $minute: '$timestampDate' },
+                                { $mod: [{ $minute: '$timestampDate' }, intervalInMinutes] },
+                            ],
                         },
                         month: '$timestampElements.month',
                         // seconds: '$timestampElements.seconds',
                         year: '$timestampElements.year',
                     },
                     average: {
-                        $avg: '$value'
-                    },
-                    sum: {
-                        $sum: '$value'
+                        $avg: '$value',
                     },
                     maximum: {
-                        $max: '$value'
+                        $max: '$value',
                     },
                     minimum: {
-                        $min: '$value'
-                    }
-                }
-            }
+                        $min: '$value',
+                    },
+                    sum: {
+                        $sum: '$value',
+                    },
+                },
+            },
         ]).toArray();
 
         return result.map((x) => {
             return {
-                tags: tags,
+                tags,
                 timestamp: moment(new Date(x._id.year, x._id.month - 1, x._id.day, x._id.hours, x._id.minutes, 0)).format('YYYY/MM/DD HH:mm:ss'),
                 x: new Date(x._id.year, x._id.month - 1, x._id.day, x._id.hours, x._id.minutes, 0).getTime(),
                 y: x[aggregate],
             };
         }).sort((a, b) => {
-            if (a.timestamp < b.timestamp)
+            if (a.timestamp < b.timestamp) {
                 return -1;
-            if (a.timestamp > b.timestamp)
+            }
+
+            if (a.timestamp > b.timestamp) {
                 return 1;
+            }
+
             return 0;
         });
     }

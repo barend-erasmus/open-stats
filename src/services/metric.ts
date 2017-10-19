@@ -147,8 +147,8 @@ export class MetricService {
 
         if (!this.counters[token][tagBucket][name]) {
             this.counters[token][tagBucket][name] = {
-                tags: tags,
-                value: value
+                tags,
+                value,
             };
         } else {
             this.counters[token][tagBucket][name].value += value;
@@ -169,8 +169,8 @@ export class MetricService {
 
         if (!this.gauges[token][tagBucket][name]) {
             this.gauges[token][tagBucket][name] = {
-                tags: tags,
-                value: value
+                tags,
+                value,
             };
         } else {
             this.gauges[token][tagBucket][name].value = value;
@@ -191,7 +191,7 @@ export class MetricService {
 
         if (!this.timings[token][tagBucket][name]) {
             this.timings[token][tagBucket][name] = {
-                tags: tags,
+                tags,
                 values: [value],
             };
         } else {

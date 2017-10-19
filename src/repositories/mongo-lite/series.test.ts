@@ -78,13 +78,13 @@ describe("SeriesRepository", () => {
             const randomId = uuid.v4();
 
             await seriesRepository.saveData(`simple.data-${randomId}`, 25, moment(timestamp).subtract(1, 'minute').toDate().getTime(), 'token', {
+                environment: 'live',
                 hostname: 'my-hostname-1',
-                environment: 'live'
             });
 
             await seriesRepository.saveData(`simple.data-${randomId}`, 25, moment(timestamp).subtract(1, 'minute').toDate().getTime(), 'token', {
+                environment: 'live',
                 hostname: 'my-hostname-2',
-                environment: 'live'
             });
 
             const result = await seriesRepository.getData(`simple.data-${randomId}`, moment(timestamp).subtract(2, 'minute').toDate().getTime(), 'token', {
@@ -144,6 +144,6 @@ describe("SeriesRepository", () => {
 
             expect(result.length).to.be.eq(3);
         });
-        
+
     });
 });
